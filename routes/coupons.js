@@ -5,8 +5,8 @@ const handleErrorAsync = require("../utils/handleErrorAsync");
 
 router.get("/", handleErrorAsync(couponsController.getCoupons));
 router.get("/:coupons_id", handleErrorAsync(couponsController.getCouponsDetail));
-router.post("/", handleErrorAsync(couponsController.getCoupons));
-router.put("/:coupons_id", handleErrorAsync(couponsController.getCouponsDetail));
-router.delete("/:coupons_id", handleErrorAsync(couponsController.getCouponsDetail));
+router.post("/", handleErrorAsync(couponsController.postCoupons));
+router.put("/:coupons_id", handleErrorAsync(couponsController.putCoupons));
+router.delete("/:coupons_id", handleErrorAsync(couponsController.deleteCoupons));
 
 module.exports = router;

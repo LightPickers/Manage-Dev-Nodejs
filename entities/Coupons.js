@@ -21,21 +21,7 @@ module.exports = new EntitySchema({
       nullable: false,
     },
     discount: {
-      type: "numeric",
-      precision: 3,
-      scale: 2,
-      nullable: false,
-    },
-    start_at: {
-      type: "timestamp",
-      nullable: false,
-    },
-    end_at: {
-      type: "timestamp",
-      nullable: false,
-    },
-    is_available: {
-      type: "boolean",
+      type: "integer",
       nullable: false,
     },
     quantity: {
@@ -45,6 +31,18 @@ module.exports = new EntitySchema({
     distributed_quantity: {
       type: "integer",
       default: 0,
+      nullable: false,
+    },
+    start_at: {
+      type: "date",
+      nullable: false,
+    },
+    end_at: {
+      type: "date",
+      nullable: false,
+    },
+    is_available: {
+      type: "boolean",
       nullable: false,
     },
     created_at: {
