@@ -1,21 +1,21 @@
 {
-  "name": "frontend-dev-nodejs",
+  "name": "manage-dev-nodejs",
   "version": "1.0.0",
-  "description": "Light Peakers frontend-dev-node.js",
+  "description": "Light Peakers manage-dev-node.js",
   "main": "./bin/www.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LightPickers/Frontend-Dev-Nodejs.git"
+    "url": "git+https://github.com/LightPickers/Manage-Dev-Nodejs.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/LightPickers/Frontend-Dev-Nodejs/issues"
+    "url": "https://github.com/LightPickers/Manage-Dev-Nodejs/issues"
   },
-  "homepage": "https://github.com/LightPickers/Frontend-Dev-Nodejs#readme",
+  "homepage": "https://github.com/LightPickers/Manage-Dev-Nodejs#readme",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",

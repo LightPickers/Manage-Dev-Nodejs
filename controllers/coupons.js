@@ -173,8 +173,6 @@ async function putCoupons(req, res, next) {
     where: { id: coupons_id },
   });
 
-  console.log(coupon);
-
   if (!coupon) {
     logger.warn(`優惠卷${ERROR_MESSAGES.DATA_NOT_FOUND}`);
     return next(new AppError(400, `優惠卷${ERROR_MESSAGES.DATA_NOT_FOUND}`));
