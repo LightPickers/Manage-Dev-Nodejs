@@ -8,10 +8,15 @@ function isValidString(value) {
   return typeof value === "string" && !validator.isEmpty(value.trim());
 }
 function isValidInteger(value) {
-  return typeof value === "number" && validator.isInt(String(value), { min: 0 });
+  return (
+    typeof value === "number" && validator.isInt(String(value), { min: 0 })
+  );
 }
 function isValidBoolean(value) {
-  return typeof value === "number" && validator.isInt(String(value), { min: 0 });
+  return typeof value === "boolean";
+}
+function isValidDate(value) {
+  return validator.isDate(value, { format: "YYYY-MM-DD", strictMode: true });
 }
 function isValidEmail(value) {
   return validator.isEmail(value);
@@ -34,6 +39,7 @@ module.exports = {
   isValidString,
   isValidInteger,
   isValidBoolean,
+  isValidDate,
   isValidEmail,
   isValidPassword,
   isValidUrl,

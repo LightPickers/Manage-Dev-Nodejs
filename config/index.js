@@ -2,12 +2,14 @@ const dotenv = require("dotenv");
 
 const result = dotenv.config();
 const db = require("./db");
+const web = require("./web");
 
 if (result.error) {
   throw result.error;
 }
 const config = {
   db,
+  web,
 };
 
 class ConfigManager {
