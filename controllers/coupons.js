@@ -34,17 +34,16 @@ async function getCoupons(req, res, next) {
 }
 async function getCouponsDetail(req, res, next) {
   const { coupons_id } = req.params;
-  console.log(coupons_id);
   if (isUndefined(coupons_id) || !isValidString(coupons_id)) {
     logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
     return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
   }
 
-  const couponRepo = await dataSource.getRepository("Coupons");
+  const couponRepo = dataSource.getRepository("Coupons");
   const coupon = await couponRepo.findOneBy({ id: coupons_id });
   if (!coupon) {
-    logger.warn(`優惠卷${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(400, `優惠卷${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+    logger.warn(`優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(400, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
   res.status(200).json({
@@ -102,7 +101,7 @@ async function postCoupons(req, res, next) {
     return next(new AppError(400, ERROR_MESSAGES.COUPON_END_BEFORE_START));
   }
 
-  const couponRepo = await dataSource.getRepository("Coupons");
+  const couponRepo = dataSource.getRepository("Coupons");
   const newCoupon = await couponRepo.create({
     code,
     name,
@@ -174,8 +173,8 @@ async function putCoupons(req, res, next) {
   });
 
   if (!coupon) {
-    logger.warn(`優惠卷${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(400, `優惠卷${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+    logger.warn(`優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(400, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
   if (endAt <= startAt) {
@@ -200,8 +199,8 @@ async function putCoupons(req, res, next) {
     coupon.end_at === endAt &&
     coupon.is_available === isAvailable
   ) {
-    logger.warn(`優惠卷${ERROR_MESSAGES.DATA_NOT_CHANGE}`);
-    return next(new AppError(400, `優惠卷${ERROR_MESSAGES.DATA_NOT_CHANGE}`));
+    logger.warn(`優惠券${ERROR_MESSAGES.DATA_NOT_CHANGE}`);
+    return next(new AppError(400, `優惠券${ERROR_MESSAGES.DATA_NOT_CHANGE}`));
   }
 
   const updateResult = await couponRepo.update(
@@ -221,9 +220,9 @@ async function putCoupons(req, res, next) {
   );
 
   if (updateResult.affected === 0) {
-    logger.warn(`優惠卷${ERROR_MESSAGES.DATA_UPDATE_FAILED}`);
+    logger.warn(`優惠券${ERROR_MESSAGES.DATA_UPDATE_FAILED}`);
     return next(
-      new AppError(400, `優惠卷${ERROR_MESSAGES.DATA_UPDATE_FAILED}`)
+      new AppError(400, `優惠券${ERROR_MESSAGES.DATA_UPDATE_FAILED}`)
     );
   }
 
@@ -236,7 +235,6 @@ async function putCoupons(req, res, next) {
     },
   });
 }
-
 async function deleteCoupons(req, res, next) {
   const { coupons_id } = req.params;
   if (isUndefined(coupons_id) || !isValidString(coupons_id)) {
@@ -248,8 +246,8 @@ async function deleteCoupons(req, res, next) {
     .getRepository("Coupons")
     .delete({ id: coupons_id });
   if (result.affected === 0) {
-    logger.warn(`優惠卷${ERROR_MESSAGES.DATA_NOT_DELETE}`);
-    return next(new AppError(400, `優惠卷${ERROR_MESSAGES.DATA_NOT_DELETE}`));
+    logger.warn(`優惠券${ERROR_MESSAGES.DATA_NOT_DELETE}`);
+    return next(new AppError(400, `優惠券${ERROR_MESSAGES.DATA_NOT_DELETE}`));
   }
 
   res.status(200).json({

@@ -5,7 +5,7 @@ const ERROR_MESSAGES = {
   DATA_NOT_CHANGE: "資料未改變",
   DATA_NOT_DELETE: "資料未刪除",
   DATA_NOT_FOUND: "資料不存在",
-  DATA_UPDATE_FAILED: "更新使用者失敗",
+  DATA_UPDATE_FAILED: "資料更新失敗",
   EMAIL_NOT_RULE: "Email 不符合規則",
   EMAIL_ALREADY_USED: "Email 已被使用",
   PASSWORD_NOT_RULE:
@@ -17,9 +17,9 @@ const ERROR_MESSAGES = {
   PHONE_NOT_RULE: "電話號碼格式錯誤，須為 09 開頭加 8 碼數字",
   ADDRESS_NOT_RULE: "地址資料填寫不完整",
   ZIPCODE_NOT_RULE: "郵遞區號必須為 3 碼數字",
-  COUPON_NOT_ZERO: "優惠卷數量不能為 0",
-  COUPON_END_BEFORE_START: "優惠卷結束日比起始日早",
-  COUPON_QUANTITY_MORETHAN_DISTRUBUTED: "優惠卷庫存須大於已使用數量",
+  COUPON_NOT_ZERO: "優惠券數量不能為 0",
+  COUPON_END_BEFORE_START: "優惠券結束日比起始日早",
+  COUPON_QUANTITY_MORETHAN_DISTRUBUTED: "優惠券庫存須大於已使用數量",
 };
 
 module.exports = ERROR_MESSAGES;
