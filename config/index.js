@@ -1,5 +1,12 @@
 const dotenv = require("dotenv");
 
+try {
+  dotenv.config();
+  console.log("已成功載入 .env 檔案");
+} catch (error) {
+  console.warn("無法載入 .env 檔案，將使用環境變數:", error.message);
+}
+
 const result = dotenv.config();
 const db = require("./db");
 const web = require("./web");
