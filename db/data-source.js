@@ -2,6 +2,11 @@ const { DataSource } = require("typeorm");
 const config = require("../config/index");
 
 const Coupons = require("../entities/Coupons");
+const Brands = require("../entities/Brands");
+const Categories = require("../entities/Categories");
+const Conditions = require("../entities/Conditions");
+const Favorites = require("../entities/Favorites");
+const Products = require("../entities/Products");
 
 const dataSource = new DataSource({
   type: "postgres",
@@ -12,7 +17,7 @@ const dataSource = new DataSource({
   database: config.get("db.database"),
   synchronize: config.get("db.synchronize"),
   poolSize: 10,
-  entities: [Coupons],
+  entities: [Coupons, Brands, Categories, Conditions, Favorites, Products],
   ssl: config.get("db.ssl"),
 });
 
