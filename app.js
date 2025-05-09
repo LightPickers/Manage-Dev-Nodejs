@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const couponsRouter = require("./routes/coupons");
+const productsRouter = require("./routes/products");
 
 const app = express();
 
@@ -9,6 +10,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/v1/admin/coupons", couponsRouter);
+app.use("/api/v1/admin/products", productsRouter);
 
 //404
 app.use((req, res, next) => {
