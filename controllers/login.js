@@ -1,7 +1,9 @@
 const { dataSource } = require("../db/data-source");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const config = require("../config/index");
 const AppError = require("../utils/appError");
-const logger = require("../utils/logger")("AuthController");
+const logger = require("../utils/logger")("LoginController");
 const validateLogin = require("../utils/validateLogin");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
@@ -55,14 +57,24 @@ async function login(req, res, next) {
       });
     }
 
+    const token = jwt.sign(
+      {
+        id: existingUser.id,
+        role: existingUser.role_id,
+      },
+      config.get("secret.jwtSecret"),
+      {
+        expiresIn: `${config.get("secret.jwtExpiresDay")}`,
+      }
+    );
+
     res.status(200).json({
-      status: "true",
+      status: true,
       message: "登入成功",
       data: {
+        token,
         user: {
-          id: existingUser.id,
           name: existingUser.name,
-          role: existingUser.role_id,
         },
       },
     });

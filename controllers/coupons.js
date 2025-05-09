@@ -9,7 +9,7 @@ const {
   isValidBoolean,
   isValidDate,
 } = require("../utils/validUtils");
-const AppError = require("../utils/AppError");
+const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
 async function getCoupons(req, res, next) {
