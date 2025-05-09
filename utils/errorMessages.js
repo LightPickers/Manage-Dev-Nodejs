@@ -2,6 +2,7 @@ const ERROR_MESSAGES = {
   FIELDS_INCORRECT: "欄位未填寫正確",
   URL_INCORRECT: "網址未填寫正確",
   PROFILE_PHOTO_URL_INCORRECT: "大頭貼網址未填寫正確",
+  URL_INCORRECT: "網址未填寫正確",
   DATA_NOT_CHANGE: "資料未改變",
   DATA_NOT_DELETE: "資料未刪除",
   DATA_NOT_FOUND: "資料不存在",
