@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const loginRouter = require("./routes/login");
 const couponsRouter = require("./routes/coupons");
 const productsRouter = require("./routes/products");
 
@@ -9,6 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/api/v1/admin", loginRouter);
 app.use("/api/v1/admin/coupons", couponsRouter);
 app.use("/api/v1/admin/products", productsRouter);
 

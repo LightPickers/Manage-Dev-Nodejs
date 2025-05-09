@@ -4,6 +4,7 @@ const PATTERN_RULE = {
   URL_PATTERN: /^(https:\/\/)([a-zA-Z0-9.-]+)(\.[a-zA-Z]{2,})(\/.*)?$/,
   PHONE_PATTERN: /^(09\d{8})$/,
   ZIPCODE_PATTERN: /^\d{3}$/,
+  EMAIL_PATTERN: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 };
 
 module.exports = PATTERN_RULE;
