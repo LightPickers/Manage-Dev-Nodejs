@@ -7,6 +7,7 @@ const Categories = require("../entities/Categories");
 const Conditions = require("../entities/Conditions");
 const Favorites = require("../entities/Favorites");
 const Products = require("../entities/Products");
+const Product_images = require("../entities/Product_images");
 
 const dataSource = new DataSource({
   type: "postgres",
@@ -17,7 +18,15 @@ const dataSource = new DataSource({
   database: config.get("db.database"),
   synchronize: config.get("db.synchronize"),
   poolSize: 10,
-  entities: [Coupons, Brands, Categories, Conditions, Favorites, Products],
+  entities: [
+    Coupons,
+    Brands,
+    Categories,
+    Conditions,
+    Favorites,
+    Products,
+    Product_images,
+  ],
   ssl: config.get("db.ssl"),
 });
 
