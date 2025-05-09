@@ -2,6 +2,7 @@ const ERROR_MESSAGES = {
   FIELDS_INCORRECT: "欄位未填寫正確",
   URL_INCORRECT: "網址未填寫正確",
   PROFILE_PHOTO_URL_INCORRECT: "大頭貼網址未填寫正確",
+  URL_INCORRECT: "網址未填寫正確",
   DATA_NOT_CHANGE: "資料未改變",
   DATA_NOT_DELETE: "資料未刪除",
   DATA_NOT_FOUND: "資料不存在",
@@ -20,6 +21,7 @@ const ERROR_MESSAGES = {
   COUPON_NOT_ZERO: "優惠券數量不能為 0",
   COUPON_END_BEFORE_START: "優惠券結束日比起始日早",
   COUPON_QUANTITY_MORETHAN_DISTRUBUTED: "優惠券庫存須大於已使用數量",
+  PRODUCT_IMAGES_NOT_MORE_THAN_FIVE: "商品附圖不能超過五張",
 };
 
 module.exports = ERROR_MESSAGES;
