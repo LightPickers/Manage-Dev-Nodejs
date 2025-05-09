@@ -76,6 +76,13 @@ async function postProducts(req, res, next) {
     );
   }
 
+  if (images.length > 5) {
+    logger.warn(ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE);
+    return next(
+      new AppError(400, ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE)
+    );
+  }
+
   const productsRepo = dataSource.getRepository("Products");
   const newProducts = await productsRepo.create({
     category_id: categoryId,
