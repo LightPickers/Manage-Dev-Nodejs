@@ -21,6 +21,7 @@ const ERROR_MESSAGES = {
   COUPON_NOT_ZERO: "優惠券數量不能為 0",
   COUPON_END_BEFORE_START: "優惠券結束日比起始日早",
   COUPON_QUANTITY_MORETHAN_DISTRUBUTED: "優惠券庫存須大於已使用數量",
+  PRODUCT_IMAGES_NOT_MORE_THAN_FIVE: "商品附圖不能超過五張",
 };
 
 module.exports = ERROR_MESSAGES;
