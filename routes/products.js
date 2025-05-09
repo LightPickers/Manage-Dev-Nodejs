@@ -3,4 +3,6 @@ const router = express.Router();
 const productsController = require("../controllers/products");
 const handleErrorAsync = require("../utils/handleErrorAsync");
 
+router.post("/", handleErrorAsync(productsController.postProducts));
+
 module.exports = router;
