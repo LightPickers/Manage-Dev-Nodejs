@@ -7,6 +7,7 @@ const Categories = require("../entities/Categories");
 const Conditions = require("../entities/Conditions");
 const Favorites = require("../entities/Favorites");
 const Products = require("../entities/Products");
+const Product_images = require("../entities/Product_images");
 const Users = require("../entities/Users");
 const Roles = require("../entities/Roles");
 
@@ -26,6 +27,7 @@ const dataSource = new DataSource({
     Conditions,
     Favorites,
     Products,
+    Product_images,
     Users,
     Roles,
   ],

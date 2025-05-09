@@ -33,6 +33,18 @@ function isValidPhone(value) {
 function isValidName(value) {
   return PATTERN_RULE.NAME_PATTERN.test(value);
 }
+function isValidArrayOfString(value) {
+  return (
+    Array.isArray(value) &&
+    value.every((item) => typeof item === "string" && item.trim() !== "")
+  );
+}
+function isValidArrayOfURL(value) {
+  return (
+    Array.isArray(value) &&
+    value.every((item) => PATTERN_RULE.URL_PATTERN.test(item))
+  );
+}
 
 module.exports = {
   isUndefined,
@@ -45,4 +57,6 @@ module.exports = {
   isValidUrl,
   isValidPhone,
   isValidName,
+  isValidArrayOfString,
+  isValidArrayOfURL,
 };
