@@ -7,6 +7,7 @@ const ERROR_MESSAGES = {
   DATA_NOT_DELETE: "資料未刪除",
   DATA_NOT_FOUND: "資料不存在",
   DATA_UPDATE_FAILED: "資料更新失敗",
+  DATA_ALREADY_USED: "資料已被使用",
   USER_NOT_FOUND: "使用者不存在",
   UPDATE_USER_FAILED: "更新使用者失敗",
   USER_NOT_CHANGE: "使用者名稱未改變",
@@ -30,9 +31,6 @@ const ERROR_MESSAGES = {
   BIRTH_DATE_NOT_RULE: "生日格式不正確或超出合理範圍（yyyy-mm-dd）",
   DUPLICATE_FAVORITES: "商品已加入收藏資料",
   FAVORITE_NOT_FOUND: "商品未加入收藏資料",
-  DATA_NOT_FOUND: "資料不存在",
-  DATA_ALREADY_USED: "資料已被使用",
-  DATA_NOT_DELETE: "資料未刪除",
   REDIS_WRITE_FAILED: "Redis 寫入失敗",
   REDIS_FAILED_TO_PROCESS_CHECKOUT: "Redis暫時無法處理結帳資訊",
   ID_NOT_RULE: "ID 格式錯誤",
@@ -44,6 +42,7 @@ const ERROR_MESSAGES = {
   PRICE_RANGE_NOT_RULE:
     "價格區間格式錯誤，必須是合法的 JSON 陣列字串，請勿使用 00，且需由兩個數字組成，例如 [1000, 5000]",
   FINISH_CHECKOUT_FIRST: "請先完成結帳確認流程",
+  LIMIT_STRING_LENGTH: "上限字元數為",
 };
 
 module.exports = ERROR_MESSAGES;
