@@ -75,6 +75,24 @@ async function postProducts(req, res, next) {
       new AppError(400, `Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`)
     );
   }
+  if (name.length > 100) {
+    logger.warn(`name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`);
+    return next(
+      new AppError(400, `name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`)
+    );
+  }
+  if (title.length > 50) {
+    logger.warn(`title ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`);
+    return next(
+      new AppError(400, `title ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`)
+    );
+  }
+  if (subtitle.length > 50) {
+    logger.warn(`subtitle ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`);
+    return next(
+      new AppError(400, `subtitle ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`)
+    );
+  }
 
   if (images.length > 5) {
     logger.warn(ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE);
@@ -179,6 +197,25 @@ async function putProducts(req, res, next) {
     logger.warn(`Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`);
     return next(
       new AppError(400, `Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`)
+    );
+  }
+
+  if (name.length > 100) {
+    logger.warn(`name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`);
+    return next(
+      new AppError(400, `name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`)
+    );
+  }
+  if (title.length > 50) {
+    logger.warn(`title ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`);
+    return next(
+      new AppError(400, `title ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`)
+    );
+  }
+  if (subtitle.length > 50) {
+    logger.warn(`subtitle ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`);
+    return next(
+      new AppError(400, `subtitle ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`)
     );
   }
 
