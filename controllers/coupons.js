@@ -1,6 +1,6 @@
 const { IsNull, In } = require("typeorm");
 const config = require("../config/index");
-const logger = require("../utils/logger")("coupons");
+const logger = require("../utils/logger")("Coupons");
 const { dataSource } = require("../db/data-source");
 const {
   isUndefined,
@@ -43,7 +43,7 @@ async function getCouponsDetail(req, res, next) {
   const coupon = await couponRepo.findOneBy({ id: coupons_id });
   if (!coupon) {
     logger.warn(`優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(400, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+    return next(new AppError(404, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
   res.status(200).json({
@@ -174,7 +174,7 @@ async function putCoupons(req, res, next) {
 
   if (!coupon) {
     logger.warn(`優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(400, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+    return next(new AppError(404, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
   if (endAt <= startAt) {
