@@ -13,25 +13,80 @@ const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
 async function getCoupons(req, res, next) {
-  const coupons = await dataSource.getRepository("Coupons").find({
-    select: [
-      "id",
-      "name",
-      "code",
-      "discount",
-      "quantity",
-      "distributed_quantity",
-      "start_at",
-      "end_at",
-      "is_available",
-    ],
-  });
+  const { page, per, name, keyword } = req.query;
+  console.log(req.query);
+  if (
+    isUndefined(page) ||
+    !isValidString(page) ||
+    isUndefined(per) ||
+    !isValidString(per)
+  ) {
+    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
+    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+  }
+
+  const pageNumber = parseInt(page, 10) || 1;
+  const perNumber = parseInt(per, 10) || 10;
+  const skip = perNumber * (pageNumber - 1);
+  if (!isValidInteger(pageNumber) || !isValidInteger(perNumber)) {
+    logger.warn(`page 和 per ${ERROR_MESSAGES.DATA_NOT_POSITIVE}`);
+    return next(
+      new AppError(400, `page 和 per ${ERROR_MESSAGES.DATA_NOT_POSITIVE}`)
+    );
+  }
+  if (skip < 0) {
+    logger.warn(`skip ${ERROR_MESSAGES.DATA_NEGATIVE}`);
+    return next(new AppError(400, `skip ${ERROR_MESSAGES.DATA_NEGATIVE}`));
+  }
+
+  const queryBuilder = dataSource
+    .getRepository("Coupons")
+    .createQueryBuilder("coupon")
+    .select([
+      "coupon.id",
+      "coupon.name",
+      "coupon.code",
+      "coupon.discount",
+      "coupon.quantity",
+      "coupon.distributed_quantity",
+      "coupon.start_at",
+      "coupon.end_at",
+      "coupon.is_available",
+    ])
+    .orderBy("coupon.start_at", "ASC")
+    .skip(skip)
+    .take(perNumber);
+
+  if (name) {
+    if (!isValidString(name)) {
+      logger.warn(`name ${ERROR_MESSAGES.FIELDS_INCORRECT}`);
+      return next(new AppError(400, `name ${ERROR_MESSAGES.FIELDS_INCORRECT}`));
+    } else {
+      queryBuilder.andWhere("coupon.name = :name", { name });
+    }
+  }
+  if (keyword) {
+    if (!isValidString(keyword)) {
+      logger.warn(`keyword ${ERROR_MESSAGES.FIELDS_INCORRECT}`);
+      return next(
+        new AppError(400, `keyword ${ERROR_MESSAGES.FIELDS_INCORRECT}`)
+      );
+    } else {
+      queryBuilder.andWhere(
+        "(coupon.name LIKE :keyword OR coupon.code LIKE :keyword)",
+        { keyword: `%${keyword}%` }
+      );
+    }
+  }
+
+  const coupons = await queryBuilder.getMany();
 
   res.status(200).json({
     status: true,
     data: coupons,
   });
 }
+
 async function getCouponsDetail(req, res, next) {
   const { coupons_id } = req.params;
   if (isUndefined(coupons_id) || !isValidString(coupons_id)) {
@@ -51,6 +106,7 @@ async function getCouponsDetail(req, res, next) {
     data: coupon,
   });
 }
+
 async function postCoupons(req, res, next) {
   const {
     code,
@@ -123,6 +179,7 @@ async function postCoupons(req, res, next) {
     },
   });
 }
+
 async function putCoupons(req, res, next) {
   const { coupons_id } = req.params;
   const {
@@ -235,6 +292,7 @@ async function putCoupons(req, res, next) {
     },
   });
 }
+
 async function deleteCoupons(req, res, next) {
   const { coupons_id } = req.params;
   if (isUndefined(coupons_id) || !isValidString(coupons_id)) {
