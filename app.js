@@ -3,6 +3,7 @@ const path = require("path");
 const loginRouter = require("./routes/login");
 const couponsRouter = require("./routes/coupons");
 const productsRouter = require("./routes/products");
+const changeUserPermissionRouter = require("./routes/changeUserPermission");
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/v1/admin", loginRouter);
 app.use("/api/v1/admin/coupons", couponsRouter);
 app.use("/api/v1/admin/products", productsRouter);
+app.use("/api/v1/admin/changeUserPermission", changeUserPermissionRouter);
 
 //404
 app.use((req, res, next) => {
