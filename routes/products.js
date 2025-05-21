@@ -6,5 +6,9 @@ const handleErrorAsync = require("../utils/handleErrorAsync");
 router.post("/", handleErrorAsync(productsController.postProducts));
 router.put("/:product_id", handleErrorAsync(productsController.putProducts));
 router.get("/", handleErrorAsync(productsController.getProducts));
+router.delete(
+  "/:product_id",
+  handleErrorAsync(productsController.deleteProducts)
+);
 
 module.exports = router;
