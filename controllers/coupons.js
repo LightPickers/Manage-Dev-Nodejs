@@ -9,6 +9,8 @@ const {
   isValidBoolean,
   isValidDate,
 } = require("../utils/validUtils");
+const { validateFields } = require("../utils/validateFields");
+const { COUPONS_RULES } = require("../utils/validateRules");
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
@@ -118,26 +120,34 @@ async function postCoupons(req, res, next) {
     end_at: endAt,
     is_available: isAvailable,
   } = req.body;
-  if (
-    isUndefined(code) ||
-    !isValidString(code) ||
-    isUndefined(name) ||
-    !isValidString(name) ||
-    isUndefined(discount) ||
-    !isValidInteger(discount) ||
-    isUndefined(quantity) ||
-    !isValidInteger(quantity) ||
-    isUndefined(distributedQuantity) ||
-    !isValidInteger(distributedQuantity) ||
-    isUndefined(startAt) ||
-    !isValidDate(startAt) ||
-    isUndefined(endAt) ||
-    !isValidDate(endAt) ||
-    isUndefined(isAvailable) ||
-    !isValidBoolean(isAvailable)
-  ) {
-    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
-    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+
+  const errorFields = validateFields(
+    {
+      code,
+      name,
+      discount,
+      quantity,
+      distributedQuantity,
+      startAt,
+      endAt,
+      isAvailable,
+    },
+    COUPONS_RULES
+  );
+  if (errorFields) {
+    const errorMessages = errorFields.join(", ");
+    logger.warn(errorMessages);
+    return next(new AppError(400, errorMessages));
+  }
+
+  const couponCode = await dataSource
+    .getRepository("Coupons")
+    .findOneBy({ code });
+  if (couponCode) {
+    logger.warn(`優惠券代碼 ${ERROR_MESSAGES.DATA_ALREADY_USED}`);
+    return next(
+      new AppError(400, `優惠券代碼 ${ERROR_MESSAGES.DATA_ALREADY_USED}`)
+    );
   }
 
   if (quantity <= 0) {
