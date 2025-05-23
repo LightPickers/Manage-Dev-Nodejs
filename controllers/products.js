@@ -10,6 +10,8 @@ const {
   isValidArrayOfString,
   isValidArrayOfURL,
 } = require("../utils/validUtils");
+const { validateFields } = require("../utils/validateFields");
+const { PRODUCTS_RULES } = require("../utils/validateRules");
 const { isUUID } = require("validator");
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
@@ -33,36 +35,31 @@ async function postProducts(req, res, next) {
     selling_price: sellingPrice,
     hashtags,
   } = req.body;
-  if (
-    isUndefined(primaryImage) ||
-    isUndefined(name) ||
-    !isValidString(name) ||
-    isUndefined(categoryId) ||
-    !isValidString(categoryId) ||
-    isUndefined(conditionId) ||
-    !isValidString(conditionId) ||
-    isUndefined(summary) ||
-    !isValidString(summary) ||
-    isUndefined(title) ||
-    !isValidString(title) ||
-    isUndefined(subtitle) ||
-    !isValidString(subtitle) ||
-    isUndefined(description) ||
-    !isValidString(description) ||
-    isUndefined(isAvailable) ||
-    !isValidBoolean(isAvailable) ||
-    isUndefined(isFeatured) ||
-    !isValidBoolean(isFeatured) ||
-    isUndefined(brandId) ||
-    !isValidString(brandId) ||
-    isUndefined(originalPrice) ||
-    !isValidInteger(originalPrice) ||
-    isUndefined(sellingPrice) ||
-    !isValidInteger(sellingPrice)
-  ) {
-    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
-    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+
+  const errorFields = validateFields(
+    {
+      primaryImage,
+      name,
+      categoryId,
+      conditionId,
+      summary,
+      title,
+      subtitle,
+      description,
+      isAvailable,
+      isFeatured,
+      brandId,
+      originalPrice,
+      sellingPrice,
+    },
+    PRODUCTS_RULES
+  );
+  if (errorFields) {
+    const errorMessages = errorFields.join(", ");
+    logger.warn(errorMessages);
+    return next(new AppError(400, errorMessages));
   }
+
   if (!isValidUrl(primaryImage)) {
     logger.warn(`商品主圖${ERROR_MESSAGES.URL_INCORRECT}`);
     return next(new AppError(400, `商品主圖${ERROR_MESSAGES.URL_INCORRECT}`));
@@ -77,6 +74,8 @@ async function postProducts(req, res, next) {
       new AppError(400, `Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`)
     );
   }
+
+  // 檢查 name, title, subtitle, images 字串長度
   if (name.length > 100) {
     logger.warn(`name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`);
     return next(
@@ -101,6 +100,31 @@ async function postProducts(req, res, next) {
     return next(
       new AppError(400, ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE)
     );
+  }
+
+  // 檢查類別
+  const category = await dataSource
+    .getRepository("Categories")
+    .findOneBy({ id: categoryId });
+  if (!category) {
+    logger.warn(`類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+  // 檢查商品狀態
+  const condition = await dataSource
+    .getRepository("Conditions")
+    .findOneBy({ id: conditionId });
+  if (!condition) {
+    logger.warn(`商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+  // 檢查品牌
+  const brand = await dataSource
+    .getRepository("Brands")
+    .findOneBy({ id: brandId });
+  if (!brand) {
+    logger.warn(`品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
   const productsRepo = dataSource.getRepository("Products");
@@ -159,36 +183,31 @@ async function putProducts(req, res, next) {
     selling_price: sellingPrice,
     hashtags,
   } = req.body;
-  if (
-    isUndefined(primaryImage) ||
-    isUndefined(name) ||
-    !isValidString(name) ||
-    isUndefined(categoryId) ||
-    !isValidString(categoryId) ||
-    isUndefined(conditionId) ||
-    !isValidString(conditionId) ||
-    isUndefined(summary) ||
-    !isValidString(summary) ||
-    isUndefined(title) ||
-    !isValidString(title) ||
-    isUndefined(subtitle) ||
-    !isValidString(subtitle) ||
-    isUndefined(description) ||
-    !isValidString(description) ||
-    isUndefined(isAvailable) ||
-    !isValidBoolean(isAvailable) ||
-    isUndefined(isFeatured) ||
-    !isValidBoolean(isFeatured) ||
-    isUndefined(brandId) ||
-    !isValidString(brandId) ||
-    isUndefined(originalPrice) ||
-    !isValidInteger(originalPrice) ||
-    isUndefined(sellingPrice) ||
-    !isValidInteger(sellingPrice)
-  ) {
-    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
-    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+
+  const errorFields = validateFields(
+    {
+      primaryImage,
+      name,
+      categoryId,
+      conditionId,
+      summary,
+      title,
+      subtitle,
+      description,
+      isAvailable,
+      isFeatured,
+      brandId,
+      originalPrice,
+      sellingPrice,
+    },
+    PRODUCTS_RULES
+  );
+  if (errorFields) {
+    const errorMessages = errorFields.join(", ");
+    logger.warn(errorMessages);
+    return next(new AppError(400, errorMessages));
   }
+
   if (!isValidUrl(primaryImage)) {
     logger.warn(`商品主圖${ERROR_MESSAGES.URL_INCORRECT}`);
     return next(new AppError(400, `商品主圖${ERROR_MESSAGES.URL_INCORRECT}`));
@@ -204,6 +223,7 @@ async function putProducts(req, res, next) {
     );
   }
 
+  // 檢查 name, title, subtitle, images 字串長度
   if (name.length > 100) {
     logger.warn(`name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`);
     return next(
@@ -230,6 +250,32 @@ async function putProducts(req, res, next) {
     );
   }
 
+  // 檢查類別
+  const category = await dataSource
+    .getRepository("Categories")
+    .findOneBy({ id: categoryId });
+  if (!category) {
+    logger.warn(`類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+  // 檢查商品狀態
+  const condition = await dataSource
+    .getRepository("Conditions")
+    .findOneBy({ id: conditionId });
+  if (!condition) {
+    logger.warn(`商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+  // 檢查品牌
+  const brand = await dataSource
+    .getRepository("Brands")
+    .findOneBy({ id: brandId });
+  if (!brand) {
+    logger.warn(`品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+
+  // 資料是否存在
   const productsRepo = dataSource.getRepository("Products");
   const product = await productsRepo.findOneBy({ id: product_id });
   if (!product) {
@@ -244,11 +290,17 @@ async function putProducts(req, res, next) {
 
   const hashtagsEqual =
     product.hashtags.length === hashtags.length &&
-    product.hashtags.every((tag, i) => tag === hashtags[i]);
+    [...product.hashtags]
+      .sort()
+      .every((tag, i) => tag === [...hashtags].sort()[i]);
+
+  // 比對圖片內容
+  const dbImages = productImages.map((obj) => obj.image.trim()).sort();
+  const requestImages = images.map((img) => img.trim()).sort();
 
   const imagesEqual =
-    productImages?.length === images.length &&
-    productImages.every((obj, i) => obj.image === images[i]);
+    dbImages.length === requestImages.length &&
+    dbImages.every((img, i) => img === requestImages[i]);
 
   if (
     product.primary_image === primaryImage &&
@@ -270,6 +322,14 @@ async function putProducts(req, res, next) {
     logger.warn(`商品${ERROR_MESSAGES.DATA_NOT_CHANGE}`);
     return next(new AppError(400, `商品${ERROR_MESSAGES.DATA_NOT_CHANGE}`));
   }
+  console.log("比對結果", {
+    imagesEqual,
+    hashtagsEqual,
+    primary_image: product.primary_image === primaryImage,
+    name: product.name === name,
+    category_id: String(product.category_id) === String(categoryId),
+    // ... 其他欄位
+  });
 
   const updateResult = await productsRepo.update(
     { id: product_id },
@@ -296,13 +356,13 @@ async function putProducts(req, res, next) {
     return next(new AppError(400, `商品${ERROR_MESSAGES.DATA_UPDATE_FAILED}`));
   }
 
-  if (images) {
+  // 如果圖片不同，先刪除舊圖片後，再加上新圖片
+  if (!imagesEqual) {
     const productsImagesRepo = dataSource.getRepository("Product_images");
-    const newProductImages = images.map((imageUrl) =>
-      productsImagesRepo.create({
-        product_id,
-        image: imageUrl,
-      })
+    await productsImagesRepo.delete({ product_id });
+
+    const newProductImages = requestImages.map((imageUrl) =>
+      productsImagesRepo.create({ product_id, image: imageUrl })
     );
     await productsImagesRepo.save(newProductImages);
   }
