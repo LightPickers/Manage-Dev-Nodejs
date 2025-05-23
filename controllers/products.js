@@ -10,9 +10,11 @@ const {
   isValidArrayOfString,
   isValidArrayOfURL,
 } = require("../utils/validUtils");
+const { isUUID } = require("validator");
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
+// API 37: 新增商品
 async function postProducts(req, res, next) {
   const {
     primary_image: primaryImage,
@@ -136,6 +138,8 @@ async function postProducts(req, res, next) {
     message: "新增商品成功",
   });
 }
+
+// API 38: 修改商品
 async function putProducts(req, res, next) {
   const { product_id } = req.params;
   const {
@@ -309,6 +313,7 @@ async function putProducts(req, res, next) {
   });
 }
 
+// API 34: 取得商品列表
 async function getProducts(req, res, next) {
   try {
     const productRepository = dataSource.getRepository("Products");
@@ -332,8 +337,45 @@ async function getProducts(req, res, next) {
   }
 }
 
+// API 39: 刪除商品
+async function deleteProducts(req, res, next) {
+  const { product_id } = req.params;
+  // console.log(product_id);
+  if (
+    isUndefined(product_id) ||
+    !isValidString(product_id) ||
+    !isUUID(product_id, 4)
+  ) {
+    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
+    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+  }
+
+  const productsRepo = dataSource.getRepository("Products");
+  const existProduct = await productsRepo.findOne({
+    where: { id: product_id },
+  });
+
+  console.log(existProduct);
+  if (!existProduct) {
+    logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
+    return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
+  }
+
+  const deleting = await productsRepo.remove(existProduct);
+  if (!deleting) {
+    logger.warn(ERROR_MESSAGES.DATA_NOT_DELETE);
+    return next(new AppError(400, ERROR_MESSAGES.DATA_NOT_DELETE));
+  }
+
+  res.status(200).json({
+    status: "true",
+    message: "商品已成功刪除",
+  });
+}
+
 module.exports = {
   postProducts,
   putProducts,
   getProducts,
+  deleteProducts,
 };
