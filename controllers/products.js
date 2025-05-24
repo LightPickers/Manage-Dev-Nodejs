@@ -400,7 +400,6 @@ async function getProducts(req, res, next) {
 // API 39: 刪除商品
 async function deleteProducts(req, res, next) {
   const { product_id } = req.params;
-  // console.log(product_id);
   if (
     isUndefined(product_id) ||
     !isValidString(product_id) ||
@@ -415,13 +414,13 @@ async function deleteProducts(req, res, next) {
     where: { id: product_id },
   });
 
-  console.log(existProduct);
   if (!existProduct) {
     logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
     return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
   }
 
   const deleting = await productsRepo.remove(existProduct);
+
   if (!deleting) {
     logger.warn(ERROR_MESSAGES.DATA_NOT_DELETE);
     return next(new AppError(400, ERROR_MESSAGES.DATA_NOT_DELETE));
@@ -433,9 +432,52 @@ async function deleteProducts(req, res, next) {
   });
 }
 
+// API 40: 下架商品
+async function pullProducts(req, res, next) {
+  const product_info = {
+    ...req.body,
+    product_id: req.body.id,
+    is_available: req.body.available,
+  };
+
+  if (
+    isUndefined(product_info.product_id) ||
+    !isValidString(product_info.product_id) ||
+    !isUUID(product_info.product_id, 4)
+  ) {
+    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
+    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+  }
+
+  const productsRepo = dataSource.getRepository("Products");
+  const existProduct = await productsRepo.findOne({
+    where: { id: product_info.product_id },
+  });
+
+  if (!existProduct) {
+    logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
+    return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
+  }
+
+  if (!product_info.is_available) {
+    logger.warn(ERROR_MESSAGES.PRODUCT_PULLED);
+    return next(new AppError(400, ERROR_MESSAGES.PRODUCT_PULLED));
+  }
+  await productsRepo.update(
+    { id: product_info.product_id },
+    { is_available: false }
+  );
+
+  res.status(200).json({
+    status: "true",
+    message: "商品已成功下架",
+  });
+}
+
 module.exports = {
   postProducts,
   putProducts,
   getProducts,
   deleteProducts,
+  pullProducts,
 };

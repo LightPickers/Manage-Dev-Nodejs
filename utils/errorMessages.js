@@ -43,6 +43,7 @@ const ERROR_MESSAGES = {
     "價格區間格式錯誤，必須是合法的 JSON 陣列字串，請勿使用 00，且需由兩個數字組成，例如 [1000, 5000]",
   FINISH_CHECKOUT_FIRST: "請先完成結帳確認流程",
   LIMIT_STRING_LENGTH: "上限字元數為",
+  PRODUCT_PULLED: "商品尚未上架",
 };
 
 module.exports = ERROR_MESSAGES;
