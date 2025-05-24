@@ -322,14 +322,6 @@ async function putProducts(req, res, next) {
     logger.warn(`商品${ERROR_MESSAGES.DATA_NOT_CHANGE}`);
     return next(new AppError(400, `商品${ERROR_MESSAGES.DATA_NOT_CHANGE}`));
   }
-  console.log("比對結果", {
-    imagesEqual,
-    hashtagsEqual,
-    primary_image: product.primary_image === primaryImage,
-    name: product.name === name,
-    category_id: String(product.category_id) === String(categoryId),
-    // ... 其他欄位
-  });
 
   const updateResult = await productsRepo.update(
     { id: product_id },
