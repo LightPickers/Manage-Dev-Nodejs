@@ -10,9 +10,13 @@ const {
   isValidArrayOfString,
   isValidArrayOfURL,
 } = require("../utils/validUtils");
+const { validateFields } = require("../utils/validateFields");
+const { PRODUCTS_RULES } = require("../utils/validateRules");
+const { isUUID } = require("validator");
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
+// API 37: 新增商品
 async function postProducts(req, res, next) {
   const {
     primary_image: primaryImage,
@@ -31,36 +35,31 @@ async function postProducts(req, res, next) {
     selling_price: sellingPrice,
     hashtags,
   } = req.body;
-  if (
-    isUndefined(primaryImage) ||
-    isUndefined(name) ||
-    !isValidString(name) ||
-    isUndefined(categoryId) ||
-    !isValidString(categoryId) ||
-    isUndefined(conditionId) ||
-    !isValidString(conditionId) ||
-    isUndefined(summary) ||
-    !isValidString(summary) ||
-    isUndefined(title) ||
-    !isValidString(title) ||
-    isUndefined(subtitle) ||
-    !isValidString(subtitle) ||
-    isUndefined(description) ||
-    !isValidString(description) ||
-    isUndefined(isAvailable) ||
-    !isValidBoolean(isAvailable) ||
-    isUndefined(isFeatured) ||
-    !isValidBoolean(isFeatured) ||
-    isUndefined(brandId) ||
-    !isValidString(brandId) ||
-    isUndefined(originalPrice) ||
-    !isValidInteger(originalPrice) ||
-    isUndefined(sellingPrice) ||
-    !isValidInteger(sellingPrice)
-  ) {
-    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
-    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+
+  const errorFields = validateFields(
+    {
+      primaryImage,
+      name,
+      categoryId,
+      conditionId,
+      summary,
+      title,
+      subtitle,
+      description,
+      isAvailable,
+      isFeatured,
+      brandId,
+      originalPrice,
+      sellingPrice,
+    },
+    PRODUCTS_RULES
+  );
+  if (errorFields) {
+    const errorMessages = errorFields.join(", ");
+    logger.warn(errorMessages);
+    return next(new AppError(400, errorMessages));
   }
+
   if (!isValidUrl(primaryImage)) {
     logger.warn(`商品主圖${ERROR_MESSAGES.URL_INCORRECT}`);
     return next(new AppError(400, `商品主圖${ERROR_MESSAGES.URL_INCORRECT}`));
@@ -75,6 +74,8 @@ async function postProducts(req, res, next) {
       new AppError(400, `Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`)
     );
   }
+
+  // 檢查 name, title, subtitle, images 字串長度
   if (name.length > 100) {
     logger.warn(`name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`);
     return next(
@@ -99,6 +100,31 @@ async function postProducts(req, res, next) {
     return next(
       new AppError(400, ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE)
     );
+  }
+
+  // 檢查類別
+  const category = await dataSource
+    .getRepository("Categories")
+    .findOneBy({ id: categoryId });
+  if (!category) {
+    logger.warn(`類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+  // 檢查商品狀態
+  const condition = await dataSource
+    .getRepository("Conditions")
+    .findOneBy({ id: conditionId });
+  if (!condition) {
+    logger.warn(`商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+  // 檢查品牌
+  const brand = await dataSource
+    .getRepository("Brands")
+    .findOneBy({ id: brandId });
+  if (!brand) {
+    logger.warn(`品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
   const productsRepo = dataSource.getRepository("Products");
@@ -136,6 +162,8 @@ async function postProducts(req, res, next) {
     message: "新增商品成功",
   });
 }
+
+// API 38: 修改商品
 async function putProducts(req, res, next) {
   const { product_id } = req.params;
   const {
@@ -155,36 +183,31 @@ async function putProducts(req, res, next) {
     selling_price: sellingPrice,
     hashtags,
   } = req.body;
-  if (
-    isUndefined(primaryImage) ||
-    isUndefined(name) ||
-    !isValidString(name) ||
-    isUndefined(categoryId) ||
-    !isValidString(categoryId) ||
-    isUndefined(conditionId) ||
-    !isValidString(conditionId) ||
-    isUndefined(summary) ||
-    !isValidString(summary) ||
-    isUndefined(title) ||
-    !isValidString(title) ||
-    isUndefined(subtitle) ||
-    !isValidString(subtitle) ||
-    isUndefined(description) ||
-    !isValidString(description) ||
-    isUndefined(isAvailable) ||
-    !isValidBoolean(isAvailable) ||
-    isUndefined(isFeatured) ||
-    !isValidBoolean(isFeatured) ||
-    isUndefined(brandId) ||
-    !isValidString(brandId) ||
-    isUndefined(originalPrice) ||
-    !isValidInteger(originalPrice) ||
-    isUndefined(sellingPrice) ||
-    !isValidInteger(sellingPrice)
-  ) {
-    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
-    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+
+  const errorFields = validateFields(
+    {
+      primaryImage,
+      name,
+      categoryId,
+      conditionId,
+      summary,
+      title,
+      subtitle,
+      description,
+      isAvailable,
+      isFeatured,
+      brandId,
+      originalPrice,
+      sellingPrice,
+    },
+    PRODUCTS_RULES
+  );
+  if (errorFields) {
+    const errorMessages = errorFields.join(", ");
+    logger.warn(errorMessages);
+    return next(new AppError(400, errorMessages));
   }
+
   if (!isValidUrl(primaryImage)) {
     logger.warn(`商品主圖${ERROR_MESSAGES.URL_INCORRECT}`);
     return next(new AppError(400, `商品主圖${ERROR_MESSAGES.URL_INCORRECT}`));
@@ -200,6 +223,7 @@ async function putProducts(req, res, next) {
     );
   }
 
+  // 檢查 name, title, subtitle, images 字串長度
   if (name.length > 100) {
     logger.warn(`name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`);
     return next(
@@ -226,6 +250,32 @@ async function putProducts(req, res, next) {
     );
   }
 
+  // 檢查類別
+  const category = await dataSource
+    .getRepository("Categories")
+    .findOneBy({ id: categoryId });
+  if (!category) {
+    logger.warn(`類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+  // 檢查商品狀態
+  const condition = await dataSource
+    .getRepository("Conditions")
+    .findOneBy({ id: conditionId });
+  if (!condition) {
+    logger.warn(`商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+  // 檢查品牌
+  const brand = await dataSource
+    .getRepository("Brands")
+    .findOneBy({ id: brandId });
+  if (!brand) {
+    logger.warn(`品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(new AppError(404, `品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  }
+
+  // 資料是否存在
   const productsRepo = dataSource.getRepository("Products");
   const product = await productsRepo.findOneBy({ id: product_id });
   if (!product) {
@@ -240,11 +290,17 @@ async function putProducts(req, res, next) {
 
   const hashtagsEqual =
     product.hashtags.length === hashtags.length &&
-    product.hashtags.every((tag, i) => tag === hashtags[i]);
+    [...product.hashtags]
+      .sort()
+      .every((tag, i) => tag === [...hashtags].sort()[i]);
+
+  // 比對圖片內容
+  const dbImages = productImages.map((obj) => obj.image.trim()).sort();
+  const requestImages = images.map((img) => img.trim()).sort();
 
   const imagesEqual =
-    productImages?.length === images.length &&
-    productImages.every((obj, i) => obj.image === images[i]);
+    dbImages.length === requestImages.length &&
+    dbImages.every((img, i) => img === requestImages[i]);
 
   if (
     product.primary_image === primaryImage &&
@@ -292,13 +348,13 @@ async function putProducts(req, res, next) {
     return next(new AppError(400, `商品${ERROR_MESSAGES.DATA_UPDATE_FAILED}`));
   }
 
-  if (images) {
+  // 如果圖片不同，先刪除舊圖片後，再加上新圖片
+  if (!imagesEqual) {
     const productsImagesRepo = dataSource.getRepository("Product_images");
-    const newProductImages = images.map((imageUrl) =>
-      productsImagesRepo.create({
-        product_id,
-        image: imageUrl,
-      })
+    await productsImagesRepo.delete({ product_id });
+
+    const newProductImages = requestImages.map((imageUrl) =>
+      productsImagesRepo.create({ product_id, image: imageUrl })
     );
     await productsImagesRepo.save(newProductImages);
   }
@@ -309,6 +365,7 @@ async function putProducts(req, res, next) {
   });
 }
 
+// API 34: 取得商品列表
 async function getProducts(req, res, next) {
   try {
     const productRepository = dataSource.getRepository("Products");
@@ -332,8 +389,87 @@ async function getProducts(req, res, next) {
   }
 }
 
+// API 39: 刪除商品
+async function deleteProducts(req, res, next) {
+  const { product_id } = req.params;
+  if (
+    isUndefined(product_id) ||
+    !isValidString(product_id) ||
+    !isUUID(product_id, 4)
+  ) {
+    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
+    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+  }
+
+  const productsRepo = dataSource.getRepository("Products");
+  const existProduct = await productsRepo.findOne({
+    where: { id: product_id },
+  });
+
+  if (!existProduct) {
+    logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
+    return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
+  }
+
+  const deleting = await productsRepo.remove(existProduct);
+
+  if (!deleting) {
+    logger.warn(ERROR_MESSAGES.DATA_NOT_DELETE);
+    return next(new AppError(400, ERROR_MESSAGES.DATA_NOT_DELETE));
+  }
+
+  res.status(200).json({
+    status: "true",
+    message: "商品已成功刪除",
+  });
+}
+
+// API 40: 下架商品
+async function pullProducts(req, res, next) {
+  const product_info = {
+    ...req.body,
+    product_id: req.body.id,
+    is_available: req.body.available,
+  };
+
+  if (
+    isUndefined(product_info.product_id) ||
+    !isValidString(product_info.product_id) ||
+    !isUUID(product_info.product_id, 4)
+  ) {
+    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
+    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+  }
+
+  const productsRepo = dataSource.getRepository("Products");
+  const existProduct = await productsRepo.findOne({
+    where: { id: product_info.product_id },
+  });
+
+  if (!existProduct) {
+    logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
+    return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
+  }
+
+  if (!product_info.is_available) {
+    logger.warn(ERROR_MESSAGES.PRODUCT_PULLED);
+    return next(new AppError(400, ERROR_MESSAGES.PRODUCT_PULLED));
+  }
+  await productsRepo.update(
+    { id: product_info.product_id },
+    { is_available: false }
+  );
+
+  res.status(200).json({
+    status: "true",
+    message: "商品已成功下架",
+  });
+}
+
 module.exports = {
   postProducts,
   putProducts,
   getProducts,
+  deleteProducts,
+  pullProducts,
 };
