@@ -1,6 +1,7 @@
 const multer = require("multer");
 const path = require("path");
-const appError = require("../utils/appError");
+const AppError = require("../utils/appError");
+const ERROR_MESSAGES = require("../utils/errorMessages");
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_FILE_TYPES = [".jpg", ".jpeg", ".png"];
@@ -22,11 +23,26 @@ const upload = multer({
 }).any();
 
 module.exports = (req, res, next) => {
-  // multer 本身是 middleware, 將錯誤統一給 next() 處理
   upload(req, res, (err) => {
     if (err) {
-      return next(err);
+      if (err instanceof multer.MulterError) {
+        switch (err.code) {
+          case "LIMIT_FILE_SIZE":
+            return next(new AppError(400, ERROR_MESSAGES.FILE_SIZE));
+          case "LIMIT_UNEXPECTED_FILE":
+            return next(
+              new AppError(
+                400,
+                "檔案格式錯誤，僅限上傳  ${ALLOWED_FILE_TYPES.join(",
+                ")} 格式"
+              )
+            );
+        }
+      }
+
+      return next(new AppError(500, err.message || ERROR_MESSAGES.FILE_UPLOAD));
     }
+
     next();
   });
 };
