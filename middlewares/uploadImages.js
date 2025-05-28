@@ -12,10 +12,8 @@ const upload = multer({
   },
 
   fileFilter(req, file, cb) {
-    const ext = path.extname(file.originalname).toLowerCase(); // path.extname() 取得副檔名
-
+    const ext = path.extname(file.originalname).toLowerCase();
     if (!ALLOWED_FILE_TYPES.includes(ext)) {
-      // return cb(new Error(`檔案格式錯誤，僅限上傳 ${ALLOWED_FILE_TYPES.join(", ")} 格式。`));
       return cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE"));
     }
     cb(null, true);
@@ -33,16 +31,15 @@ module.exports = (req, res, next) => {
             return next(
               new AppError(
                 400,
-                "檔案格式錯誤，僅限上傳  ${ALLOWED_FILE_TYPES.join(",
-                ")} 格式"
+                `檔案格式錯誤，僅限上傳  ${ALLOWED_FILE_TYPES.join(",")} 格式`
               )
             );
+          default:
+            return next(new AppError(500, ERROR_MESSAGES.FILE_UPLOAD));
         }
       }
-
       return next(new AppError(500, err.message || ERROR_MESSAGES.FILE_UPLOAD));
     }
-
     next();
   });
 };
