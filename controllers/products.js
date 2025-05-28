@@ -9,6 +9,7 @@ const {
   isValidUrl,
   isValidArrayOfString,
   isValidArrayOfURL,
+  checkProduct,
 } = require("../utils/validUtils");
 const { validateFields } = require("../utils/validateFields");
 const { PRODUCTS_RULES } = require("../utils/validateRules");
@@ -466,10 +467,77 @@ async function pullProducts(req, res, next) {
   });
 }
 
+// API 36: 帶入商品詳細資訊
+async function getPreFilledInfo(req, res, next) {
+  const { product_id } = req.params;
+
+  //400
+  if (
+    isUndefined(product_id) ||
+    !isValidString(product_id) ||
+    !isUUID(product_id, 4)
+  ) {
+    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
+    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+  }
+
+  const productsRepo = dataSource.getRepository("Products");
+  const imagesRepo = dataSource.getRepository("Product_images");
+
+  // 404
+  const existProduct = await checkProduct(productsRepo, product_id);
+  if (!existProduct) {
+    logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
+    return next(new AppError(404, ERROR_MESSAGES.DATA_NOT_FOUND));
+  }
+
+  // 200
+  const productsInfo = await productsRepo.findOne({
+    select: {
+      id: true,
+      Categories: { id: true, name: true },
+      Brands: { name: true },
+      Conditions: { name: true },
+      name: true,
+      title: true,
+      subtitle: true,
+      hashtags: true,
+      description: true,
+      summary: true,
+      primary_image: true,
+      selling_price: true,
+      original_price: true,
+      is_available: true,
+      is_featured: true,
+    },
+    relations: {
+      Categories: true,
+      Brands: true,
+      Conditions: true,
+    },
+    where: { id: product_id },
+  });
+
+  const imagesInfo = await imagesRepo.find({
+    select: { image: true },
+    where: { product_id: product_id },
+  });
+
+  const image_num = imagesInfo.length;
+
+  res.status(200).json({
+    status: "true",
+    data: productsInfo,
+    imageList: imagesInfo,
+    imageCount: image_num,
+  });
+}
+
 module.exports = {
   postProducts,
   putProducts,
   getProducts,
   deleteProducts,
   pullProducts,
+  getPreFilledInfo,
 };
