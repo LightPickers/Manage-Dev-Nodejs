@@ -44,6 +44,8 @@ const ERROR_MESSAGES = {
   FINISH_CHECKOUT_FIRST: "請先完成結帳確認流程",
   LIMIT_STRING_LENGTH: "上限字元數為",
   PRODUCT_PULLED: "商品尚未上架",
+  FILE_SIZE: "檔案大小超過 2MB 限制",
+  FILE_UPLOAD: "上傳檔案時發生錯誤",
 };
 
 module.exports = ERROR_MESSAGES;
