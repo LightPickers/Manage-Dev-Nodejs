@@ -49,7 +49,13 @@ async function login(req, res, next) {
       });
     }
 
-    if (existingUser.role_id !== "a9e9fc8a-567b-45fc-8d10-26a55d0e48c9") {
+    // 從資料庫取得 管理者 id
+    const admin = await dataSource.getRepository("Roles").findOne({
+      select: ["id"],
+      where: { name: "管理者" },
+    });
+
+    if (existingUser.role_id !== admin.id) {
       logger.warn("Unauthorized access attempt by non-admin user");
       return res.status(403).json({
         status: "false",
