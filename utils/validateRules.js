@@ -1,4 +1,4 @@
-const COUPONS_RULES = {
+const COUPONS_RULE = {
   code: "string",
   name: "string",
   discount: "number",
@@ -9,7 +9,7 @@ const COUPONS_RULES = {
   isAvailable: "boolean",
 };
 
-const PRODUCTS_RULES = {
+const PRODUCTS_RULE = {
   primaryImage: "string",
   name: "string",
   categoryId: "string",
@@ -44,8 +44,8 @@ const QUARY_KEYWORD_RULE = {
 };
 
 module.exports = {
-  COUPONS_RULES,
-  PRODUCTS_RULES,
+  COUPONS_RULE,
+  PRODUCTS_RULE,
   PAGE_PER_RULE,
   PAGENUMBER_PERNUMBER_RULE,
   QUARY_NAME_RULE,

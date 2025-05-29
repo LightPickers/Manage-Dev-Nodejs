@@ -12,7 +12,7 @@ const {
   checkProduct,
 } = require("../utils/validUtils");
 const { validateFields } = require("../utils/validateFields");
-const { PRODUCTS_RULES } = require("../utils/validateRules");
+const { PRODUCTS_RULE } = require("../utils/validateRules");
 const { isUUID } = require("validator");
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
@@ -53,7 +53,7 @@ async function postProducts(req, res, next) {
       originalPrice,
       sellingPrice,
     },
-    PRODUCTS_RULES
+    PRODUCTS_RULE
   );
   if (errorFields) {
     const errorMessages = errorFields.join(", ");
@@ -201,7 +201,7 @@ async function putProducts(req, res, next) {
       originalPrice,
       sellingPrice,
     },
-    PRODUCTS_RULES
+    PRODUCTS_RULE
   );
   if (errorFields) {
     const errorMessages = errorFields.join(", ");

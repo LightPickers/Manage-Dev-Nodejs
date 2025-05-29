@@ -1,41 +1,50 @@
-const { IsNull, In } = require("typeorm");
-const config = require("../config/index");
 const logger = require("../utils/logger")("Coupons");
 const { dataSource } = require("../db/data-source");
-const {
-  isUndefined,
-  isValidString,
-  isValidInteger,
-  isValidBoolean,
-  isValidDate,
-} = require("../utils/validUtils");
+const { isUndefined, isValidString } = require("../utils/validUtils");
 const { validateFields } = require("../utils/validateFields");
-const { COUPONS_RULES } = require("../utils/validateRules");
+const {
+  COUPONS_RULE,
+  PAGE_PER_RULE,
+  PAGENUMBER_PERNUMBER_RULE,
+  QUARY_NAME_RULE,
+  QUARY_KEYWORD_RULE,
+} = require("../utils/validateRules");
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
 async function getCoupons(req, res, next) {
   const { page, per, name, keyword } = req.query;
-  console.log(req.query);
-  if (
-    isUndefined(page) ||
-    !isValidString(page) ||
-    isUndefined(per) ||
-    !isValidString(per)
-  ) {
-    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
-    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+  const errorFields = validateFields(
+    {
+      page,
+      per,
+    },
+    PAGE_PER_RULE
+  );
+  if (errorFields) {
+    const errorMessage = errorFields.join(", ");
+    logger.warn(errorMessage);
+    return next(new AppError(400, errorMessage));
   }
 
+  // 將 Page、Per 轉換為數字型別，並驗證是否為正整數
   const pageNumber = parseInt(page, 10) || 1;
   const perNumber = parseInt(per, 10) || 10;
   const skip = perNumber * (pageNumber - 1);
-  if (!isValidInteger(pageNumber) || !isValidInteger(perNumber)) {
-    logger.warn(`page 和 per ${ERROR_MESSAGES.DATA_NOT_POSITIVE}`);
-    return next(
-      new AppError(400, `page 和 per ${ERROR_MESSAGES.DATA_NOT_POSITIVE}`)
-    );
+  const errorPagePer = validateFields(
+    {
+      pageNumber,
+      perNumber,
+    },
+    PAGENUMBER_PERNUMBER_RULE
+  );
+  if (errorPagePer) {
+    const errorMessage = errorPagePer.join(", ");
+    logger.warn(errorMessage);
+    return next(new AppError(400, errorMessage));
   }
+
+  // 跳過的資料筆數，不能為負數
   if (skip < 0) {
     logger.warn(`skip ${ERROR_MESSAGES.DATA_NEGATIVE}`);
     return next(new AppError(400, `skip ${ERROR_MESSAGES.DATA_NEGATIVE}`));
@@ -59,23 +68,28 @@ async function getCoupons(req, res, next) {
     .skip(skip)
     .take(perNumber);
 
+  // 判斷網址中的 name 是否有值，並驗證欄位
   if (name) {
-    if (!isValidString(name)) {
-      logger.warn(`name ${ERROR_MESSAGES.FIELDS_INCORRECT}`);
-      return next(new AppError(400, `name ${ERROR_MESSAGES.FIELDS_INCORRECT}`));
+    const errorFields = validateFields({ name }, QUARY_NAME_RULE);
+    if (errorFields) {
+      const errorMessage = errorFields;
+      logger.warn(errorMessage);
+      return next(new AppError(400, errorMessage));
     } else {
       queryBuilder.andWhere("coupon.name = :name", { name });
     }
   }
+
+  // 判斷網址中的 keyword 是否有值，並驗證欄位
   if (keyword) {
-    if (!isValidString(keyword)) {
-      logger.warn(`keyword ${ERROR_MESSAGES.FIELDS_INCORRECT}`);
-      return next(
-        new AppError(400, `keyword ${ERROR_MESSAGES.FIELDS_INCORRECT}`)
-      );
+    const errorFields = validateFields({ keyword }, QUARY_KEYWORD_RULE);
+    if (errorFields) {
+      const errorMessage = errorFields;
+      logger.warn(errorMessage);
+      return next(new AppError(400, errorMessage));
     } else {
       queryBuilder.andWhere(
-        "(coupon.name LIKE :keyword OR coupon.code LIKE :keyword)",
+        "(coupon.name LIKE :keyword OR coupon.code LIKE :keyword)", // 以 優惠券名稱 或 優惠券code 進行搜尋
         { keyword: `%${keyword}%` }
       );
     }
@@ -132,7 +146,7 @@ async function postCoupons(req, res, next) {
       endAt,
       isAvailable,
     },
-    COUPONS_RULES
+    COUPONS_RULE
   );
   if (errorFields) {
     const errorMessages = errorFields.join(", ");
@@ -168,7 +182,7 @@ async function postCoupons(req, res, next) {
   }
 
   const couponRepo = dataSource.getRepository("Coupons");
-  const newCoupon = await couponRepo.create({
+  const newCoupon = couponRepo.create({
     code,
     name,
     discount,
@@ -202,29 +216,27 @@ async function putCoupons(req, res, next) {
     end_at: endAt,
     is_available: isAvailable,
   } = req.body;
-  if (
-    isUndefined(code) ||
-    !isValidString(code) ||
-    isUndefined(name) ||
-    !isValidString(name) ||
-    isUndefined(discount) ||
-    !isValidInteger(discount) ||
-    isUndefined(quantity) ||
-    !isValidInteger(quantity) ||
-    isUndefined(distributedQuantity) ||
-    !isValidInteger(distributedQuantity) ||
-    isUndefined(startAt) ||
-    !isValidString(startAt) ||
-    isUndefined(endAt) ||
-    !isValidString(endAt) ||
-    isUndefined(isAvailable) ||
-    !isValidBoolean(isAvailable)
-  ) {
-    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
-    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+
+  const errorFields = validateFields(
+    {
+      code,
+      name,
+      discount,
+      quantity,
+      distributedQuantity,
+      startAt,
+      endAt,
+      isAvailable,
+    },
+    COUPONS_RULE
+  );
+  if (errorFields) {
+    const errorMessages = errorFields.join(", ");
+    logger.warn(errorMessages);
+    return next(new AppError(400, errorMessages));
   }
 
-  const couponRepo = await dataSource.getRepository("Coupons");
+  const couponRepo = dataSource.getRepository("Coupons");
   const coupon = await couponRepo.findOne({
     select: [
       "code",
