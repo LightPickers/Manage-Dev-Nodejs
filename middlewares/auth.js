@@ -64,8 +64,13 @@ const isAuth = async (req, res, next) => {
  * 驗證使用者是否為管理員的中間件
  * 必須在 isAuth 中間件之後使用
  */
-const isAdmin = (req, res, next) => {
-  if (req.user && req.user.role_id === "a9e9fc8a-567b-45fc-8d10-26a55d0e48c9") {
+const isAdmin = async (req, res, next) => {
+  const admin = await dataSource.getRepository("Roles").findOne({
+    select: ["id"],
+    where: { name: "管理者" },
+  });
+
+  if (req.user && req.user.role_id === admin.id) {
     next();
   } else {
     logger.warn("非管理員嘗試訪問管理員權限路由");
