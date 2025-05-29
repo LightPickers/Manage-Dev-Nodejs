@@ -52,6 +52,7 @@ async function getUsers(req, res, next) {
     .getRepository("Users")
     .createQueryBuilder("user")
     .select(["user.id", "user.name", "user.email", "user.is_banned"])
+    .orderBy("user.email", "ASC")
     .skip(skip)
     .take(perNumber);
 
