@@ -10,6 +10,7 @@ const {
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
+// API 63.取得用戶列表
 async function getUsers(req, res, next) {
   const { page, per, name, keyword } = req.query;
   const errorFields = validateFields(
@@ -48,9 +49,16 @@ async function getUsers(req, res, next) {
     return next(new AppError(400, `skip ${ERROR_MESSAGES.DATA_NEGATIVE}`));
   }
 
+  // 取得 使用者 role_id
+  const roleUser = await dataSource
+    .getRepository("Roles")
+    .findOneBy({ name: "使用者" });
+  const roleUserId = roleUser.id;
+
   const queryBuilder = dataSource
     .getRepository("Users")
     .createQueryBuilder("user")
+    .where("user.role_id = :roleUserId", { roleUserId })
     .select(["user.id", "user.name", "user.email", "user.is_banned"])
     .orderBy("user.email", "ASC")
     .skip(skip)
