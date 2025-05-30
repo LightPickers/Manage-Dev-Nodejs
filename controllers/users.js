@@ -10,6 +10,7 @@ const {
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
+// API 63.取得用戶列表
 async function getUsers(req, res, next) {
   const { page, per, name, keyword } = req.query;
   const errorFields = validateFields(
@@ -48,9 +49,22 @@ async function getUsers(req, res, next) {
     return next(new AppError(400, `skip ${ERROR_MESSAGES.DATA_NEGATIVE}`));
   }
 
+  // 取得 使用者 role_id
+  const roleUser = await dataSource
+    .getRepository("Roles")
+    .findOneBy({ name: "使用者" });
+  const roleUserId = roleUser.id;
+  if (!roleUserId) {
+    logger.warn(`使用者 role_id ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+    return next(
+      new AppError(`使用者 role_id ${ERROR_MESSAGES.DATA_NOT_FOUND}`)
+    );
+  }
+
   const queryBuilder = dataSource
     .getRepository("Users")
     .createQueryBuilder("user")
+    .where("user.role_id = :roleUserId", { roleUserId })
     .select(["user.id", "user.name", "user.email", "user.is_banned"])
     .orderBy("user.email", "ASC")
     .skip(skip)
@@ -58,9 +72,9 @@ async function getUsers(req, res, next) {
 
   // 判斷網址中的 name 是否有值，並驗證欄位
   if (name) {
-    const errorFields = validateFields({ name }, QUARY_NAME_RULE);
-    if (errorFields) {
-      const errorMessage = errorFields;
+    const nameErrorFields = validateFields({ name }, QUARY_NAME_RULE);
+    if (nameErrorFields) {
+      const errorMessage = nameErrorFields;
       logger.warn(errorMessage);
       return next(new AppError(400, errorMessage));
     } else {
@@ -70,9 +84,9 @@ async function getUsers(req, res, next) {
 
   // 判斷網址中的 keyword 是否有值，並驗證欄位
   if (keyword) {
-    const errorFields = validateFields({ keyword }, QUARY_KEYWORD_RULE);
-    if (errorFields) {
-      const errorMessage = errorFields;
+    const keywordErrorFields = validateFields({ keyword }, QUARY_KEYWORD_RULE);
+    if (keywordErrorFields) {
+      const errorMessage = keywordErrorFields;
       logger.warn(errorMessage);
       return next(new AppError(400, errorMessage));
     } else {
@@ -83,11 +97,20 @@ async function getUsers(req, res, next) {
     }
   }
 
-  const users = await queryBuilder.getMany();
+  const [users, count] = await Promise.all([
+    queryBuilder.getMany(),
+    dataSource.getRepository("Users").count({ where: { role_id: roleUserId } }),
+  ]);
+
+  // 計算 總頁數
+  const totalPages = Math.ceil(count / per);
 
   res.status(200).json({
     status: true,
-    data: users,
+    data: {
+      totalPages,
+      users,
+    },
   });
 }
 
