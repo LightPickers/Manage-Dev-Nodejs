@@ -97,17 +97,19 @@ async function getUsers(req, res, next) {
     }
   }
 
-  const [users, count] = await Promise.all([
+  // 取出 搜尋的 Users 和 搜尋筆數
+  const [users, totalUsers] = await Promise.all([
     queryBuilder.getMany(),
-    dataSource.getRepository("Users").count({ where: { role_id: roleUserId } }),
+    queryBuilder.getCount(),
   ]);
 
   // 計算 總頁數
-  const totalPages = Math.ceil(count / per);
+  const totalPages = Math.ceil(totalUsers / per);
 
   res.status(200).json({
     status: true,
     data: {
+      totalUsers,
       totalPages,
       users,
     },
