@@ -11,5 +11,9 @@ router.delete(
   handleErrorAsync(productsController.deleteProducts)
 );
 router.patch("/pulled", handleErrorAsync(productsController.pullProducts));
+router.get(
+  "/:product_id",
+  handleErrorAsync(productsController.getPreFilledInfo)
+);
 
 module.exports = router;

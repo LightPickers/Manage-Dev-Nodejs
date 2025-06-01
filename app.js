@@ -5,9 +5,10 @@ const pinoHttp = require("pino-http");
 
 const logger = require("./utils/logger")("App");
 const loginRouter = require("./routes/login");
+const usersRouter = require("./routes/users");
 const couponsRouter = require("./routes/coupons");
 const productsRouter = require("./routes/products");
-const changeUserPermissionRouter = require("./routes/changeUserPermission");
+const uploadRouter = require("./routes/upload");
 
 const app = express();
 
@@ -28,9 +29,10 @@ app.use(
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/v1/admin", loginRouter);
+app.use("/api/v1/admin/users", usersRouter);
 app.use("/api/v1/admin/coupons", couponsRouter);
 app.use("/api/v1/admin/products", productsRouter);
-app.use("/api/v1/admin/changeUserPermission", changeUserPermissionRouter);
+app.use("/api/v1/upload/image", uploadRouter);
 
 //404
 app.use((req, res, next) => {

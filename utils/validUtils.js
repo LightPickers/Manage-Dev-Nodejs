@@ -45,6 +45,11 @@ function isValidArrayOfURL(value) {
     value.every((item) => PATTERN_RULE.URL_PATTERN.test(item))
   );
 }
+async function checkProduct(productsRepo, product_id) {
+  return await productsRepo.findOne({
+    where: { id: product_id },
+  });
+}
 
 module.exports = {
   isUndefined,
@@ -59,4 +64,5 @@ module.exports = {
   isValidName,
   isValidArrayOfString,
   isValidArrayOfURL,
+  checkProduct,
 };
