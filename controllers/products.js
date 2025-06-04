@@ -12,6 +12,7 @@ const {
   checkProduct,
 } = require("../utils/validUtils");
 const { validateFields } = require("../utils/validateFields");
+const { isValidQuillDelta } = require("../utils/validateQuillDelta");
 const { PRODUCTS_RULE } = require("../utils/validateRules");
 const { isUUID } = require("validator");
 const AppError = require("../utils/appError");
@@ -46,7 +47,6 @@ async function postProducts(req, res, next) {
       summary,
       title,
       subtitle,
-      description,
       isAvailable,
       isFeatured,
       brandId,
@@ -59,6 +59,14 @@ async function postProducts(req, res, next) {
     const errorMessages = errorFields.join(", ");
     logger.warn(errorMessages);
     return next(new AppError(400, errorMessages));
+  }
+
+  // 驗證 description 欄位
+  if (isUndefined(description) || !isValidQuillDelta(description)) {
+    logger.warn(`description ${ERROR_MESSAGES.INVALID_QUILL_DELTA}`);
+    return next(
+      new AppError(400, `description ${ERROR_MESSAGES.INVALID_QUILL_DELTA}`)
+    );
   }
 
   if (!isValidUrl(primaryImage)) {
@@ -194,7 +202,6 @@ async function putProducts(req, res, next) {
       summary,
       title,
       subtitle,
-      description,
       isAvailable,
       isFeatured,
       brandId,
@@ -207,6 +214,14 @@ async function putProducts(req, res, next) {
     const errorMessages = errorFields.join(", ");
     logger.warn(errorMessages);
     return next(new AppError(400, errorMessages));
+  }
+
+  // 驗證 description 欄位
+  if (isUndefined(description) || !isValidQuillDelta(description)) {
+    logger.warn(`description ${ERROR_MESSAGES.INVALID_QUILL_DELTA}`);
+    return next(
+      new AppError(400, `description ${ERROR_MESSAGES.INVALID_QUILL_DELTA}`)
+    );
   }
 
   if (!isValidUrl(primaryImage)) {

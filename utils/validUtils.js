@@ -45,6 +45,20 @@ function isValidArrayOfURL(value) {
     value.every((item) => PATTERN_RULE.URL_PATTERN.test(item))
   );
 }
+function isValidObject(value) {
+  return typeof value === "object";
+}
+function isValidQuillText(value) {
+  return typeof value === "string";
+}
+function isValidQuillImage(value) {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof value.image === "string" &&
+    PATTERN_RULE.IMAGE_URL_PATTERN.test(value.image)
+  );
+}
 async function checkProduct(productsRepo, product_id) {
   return await productsRepo.findOne({
     where: { id: product_id },
@@ -64,5 +78,8 @@ module.exports = {
   isValidName,
   isValidArrayOfString,
   isValidArrayOfURL,
+  isValidObject,
+  isValidQuillText,
+  isValidQuillImage,
   checkProduct,
 };

@@ -17,7 +17,6 @@ const PRODUCTS_RULE = {
   summary: "string",
   title: "string",
   subtitle: "string",
-  description: "string",
   isAvailable: "boolean",
   isFeatured: "boolean",
   brandId: "string",
