@@ -14,7 +14,6 @@ const PRODUCTS_RULE = {
   name: "string",
   categoryId: "string",
   conditionId: "string",
-  summary: "string",
   title: "string",
   subtitle: "string",
   isAvailable: "boolean",
