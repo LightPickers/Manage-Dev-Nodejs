@@ -44,7 +44,6 @@ async function postProducts(req, res, next) {
       name,
       categoryId,
       conditionId,
-      summary,
       title,
       subtitle,
       isAvailable,
@@ -59,6 +58,14 @@ async function postProducts(req, res, next) {
     const errorMessages = errorFields.join(", ");
     logger.warn(errorMessages);
     return next(new AppError(400, errorMessages));
+  }
+
+  // 驗證 summary 欄位
+  if (isUndefined(summary) || !isValidArrayOfString(summary)) {
+    logger.warn(`Summary ${ERROR_MESSAGES.FIELDS_INCORRECT}`);
+    return next(
+      new AppError(400, `Summary ${ERROR_MESSAGES.FIELDS_INCORRECT}`)
+    );
   }
 
   // 驗證 description 欄位
@@ -199,7 +206,6 @@ async function putProducts(req, res, next) {
       name,
       categoryId,
       conditionId,
-      summary,
       title,
       subtitle,
       isAvailable,
@@ -214,6 +220,14 @@ async function putProducts(req, res, next) {
     const errorMessages = errorFields.join(", ");
     logger.warn(errorMessages);
     return next(new AppError(400, errorMessages));
+  }
+
+  // 驗證 summary 欄位
+  if (isUndefined(summary) || !isValidArrayOfString(summary)) {
+    logger.warn(`Summary ${ERROR_MESSAGES.FIELDS_INCORRECT}`);
+    return next(
+      new AppError(400, `Summary ${ERROR_MESSAGES.FIELDS_INCORRECT}`)
+    );
   }
 
   // 驗證 description 欄位
