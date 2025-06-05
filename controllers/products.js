@@ -525,8 +525,8 @@ async function getPreFilledInfo(req, res, next) {
     select: {
       id: true,
       Categories: { id: true, name: true },
-      Brands: { name: true },
-      Conditions: { name: true },
+      Brands: { id: true, name: true },
+      Conditions: { id: true, name: true },
       name: true,
       title: true,
       subtitle: true,
