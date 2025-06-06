@@ -65,7 +65,13 @@ async function getUsers(req, res, next) {
     .getRepository("Users")
     .createQueryBuilder("user")
     .where("user.role_id = :roleUserId", { roleUserId })
-    .select(["user.id", "user.name", "user.email", "user.is_banned"])
+    .select([
+      "user.id",
+      "user.name",
+      "user.email",
+      "user.photo",
+      "user.is_banned",
+    ])
     .orderBy("user.email", "ASC")
     .skip(skip)
     .take(perNumber);
