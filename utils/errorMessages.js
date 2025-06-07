@@ -47,6 +47,9 @@ const ERROR_MESSAGES = {
   FILE_SIZE: "檔案大小超過 2MB 限制",
   FILE_UPLOAD: "上傳檔案時發生錯誤",
   INVALID_QUILL_DELTA: "不符合 Quill Delta 格式",
+  PRODUCT_SOLDOUT: "商品已無庫存",
+  PRODUCT_DELISTED: "商品已下架",
+  PRODUCT_DELETED: "商品已刪除",
 };
 
 module.exports = ERROR_MESSAGES;

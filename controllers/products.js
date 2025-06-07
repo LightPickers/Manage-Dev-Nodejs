@@ -9,7 +9,7 @@ const {
   isValidUrl,
   isValidArrayOfString,
   isValidArrayOfURL,
-  checkProduct,
+  checkProductStatus,
 } = require("../utils/validUtils");
 const { validateFields } = require("../utils/validateFields");
 const { isValidQuillDelta } = require("../utils/validateQuillDelta");
@@ -306,12 +306,28 @@ async function putProducts(req, res, next) {
   }
 
   // 資料是否存在
+  const productStatus = await checkProductStatus(
+    productsRepo,
+    product_id,
+    false
+  );
+  if (!productStatus.success) {
+    switch (productStatus.error) {
+      case ERROR_MESSAGES.PRODUCT_DELISTED:
+        return; // 商品下架，後台仍可更新商品資訊
+      default:
+        return next(new AppError(404, productStatus.error));
+    }
+  }
+
+  /*
   const productsRepo = dataSource.getRepository("Products");
   const product = await productsRepo.findOneBy({ id: product_id });
   if (!product) {
     logger.warn(`商品 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
     return next(new AppError(404, `商品${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
+  */
 
   const productImages = await dataSource.getRepository("Product_images").find({
     select: ["image"],
@@ -441,12 +457,19 @@ async function deleteProducts(req, res, next) {
     return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
   }
 
-  const deleting = await productsRepo.remove(existProduct);
+  if (existProduct.is_deleted) {
+    logger.warn(ERROR_MESSAGES.PRODUCT_DELETED);
+    return next(new AppError(400, ERROR_MESSAGES.PRODUCT_DELETED));
+  }
+  await productsRepo.update({ id: product_id }, { is_deleted: true });
 
+  /* 硬刪除
+  const deleting = await productsRepo.remove(existProduct);
   if (!deleting) {
     logger.warn(ERROR_MESSAGES.DATA_NOT_DELETE);
     return next(new AppError(400, ERROR_MESSAGES.DATA_NOT_DELETE));
   }
+  */
 
   res.status(200).json({
     status: "true",
@@ -514,10 +537,18 @@ async function getPreFilledInfo(req, res, next) {
   const imagesRepo = dataSource.getRepository("Product_images");
 
   // 404
-  const existProduct = await checkProduct(productsRepo, product_id);
-  if (!existProduct) {
-    logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
-    return next(new AppError(404, ERROR_MESSAGES.DATA_NOT_FOUND));
+  const productStatus = await checkProductStatus(
+    productsRepo,
+    product_id,
+    false
+  );
+  if (!productStatus.success) {
+    switch (productStatus.error) {
+      case ERROR_MESSAGES.PRODUCT_DELISTED:
+        return; // 商品下架，後台仍可看到該商品詳細資訊
+      default:
+        return next(new AppError(404, productStatus.error));
+    }
   }
 
   // 200
@@ -537,6 +568,8 @@ async function getPreFilledInfo(req, res, next) {
       selling_price: true,
       original_price: true,
       is_available: true,
+      is_sold: true,
+      is_deleted: true,
       is_featured: true,
     },
     relations: {
