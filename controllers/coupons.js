@@ -13,94 +13,33 @@ const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
 async function getCoupons(req, res, next) {
-  const { page, per, name, keyword } = req.query;
-  const errorFields = validateFields(
-    {
-      page,
-      per,
-    },
-    PAGE_PER_RULE
-  );
-  if (errorFields) {
-    const errorMessage = errorFields.join(", ");
-    logger.warn(errorMessage);
-    return next(new AppError(400, errorMessage));
+  try {
+    const couponRepo = dataSource.getRepository("Coupons");
+    const coupons = await couponRepo.find({
+      select: [
+        "id",
+        "name",
+        "code",
+        "discount",
+        "quantity",
+        "distributed_quantity",
+        "start_at",
+        "end_at",
+        "is_available",
+      ],
+      order: {
+        start_at: "ASC",
+      },
+    });
+
+    res.status(200).json({
+      status: true,
+      data: coupons,
+    });
+  } catch (error) {
+    logger.error("取得優惠券資料失敗:", error);
+    return next(new AppError(500, "取得優惠券資料失敗"));
   }
-
-  // 將 Page、Per 轉換為數字型別，並驗證是否為正整數
-  const pageNumber = parseInt(page, 10) || 1;
-  const perNumber = parseInt(per, 10) || 10;
-  const skip = perNumber * (pageNumber - 1);
-  const errorPagePer = validateFields(
-    {
-      pageNumber,
-      perNumber,
-    },
-    PAGENUMBER_PERNUMBER_RULE
-  );
-  if (errorPagePer) {
-    const errorMessage = errorPagePer.join(", ");
-    logger.warn(errorMessage);
-    return next(new AppError(400, errorMessage));
-  }
-
-  // 跳過的資料筆數，不能為負數
-  if (skip < 0) {
-    logger.warn(`skip ${ERROR_MESSAGES.DATA_NEGATIVE}`);
-    return next(new AppError(400, `skip ${ERROR_MESSAGES.DATA_NEGATIVE}`));
-  }
-
-  const queryBuilder = dataSource
-    .getRepository("Coupons")
-    .createQueryBuilder("coupon")
-    .select([
-      "coupon.id",
-      "coupon.name",
-      "coupon.code",
-      "coupon.discount",
-      "coupon.quantity",
-      "coupon.distributed_quantity",
-      "coupon.start_at",
-      "coupon.end_at",
-      "coupon.is_available",
-    ])
-    .orderBy("coupon.start_at", "ASC")
-    .skip(skip)
-    .take(perNumber);
-
-  // 判斷網址中的 name 是否有值，並驗證欄位
-  if (name) {
-    const errorFields = validateFields({ name }, QUARY_NAME_RULE);
-    if (errorFields) {
-      const errorMessage = errorFields;
-      logger.warn(errorMessage);
-      return next(new AppError(400, errorMessage));
-    } else {
-      queryBuilder.andWhere("coupon.name = :name", { name });
-    }
-  }
-
-  // 判斷網址中的 keyword 是否有值，並驗證欄位
-  if (keyword) {
-    const errorFields = validateFields({ keyword }, QUARY_KEYWORD_RULE);
-    if (errorFields) {
-      const errorMessage = errorFields;
-      logger.warn(errorMessage);
-      return next(new AppError(400, errorMessage));
-    } else {
-      queryBuilder.andWhere(
-        "(coupon.name LIKE :keyword OR coupon.code LIKE :keyword)", // 以 優惠券名稱 或 優惠券code 進行搜尋
-        { keyword: `%${keyword}%` }
-      );
-    }
-  }
-
-  const coupons = await queryBuilder.getMany();
-
-  res.status(200).json({
-    status: true,
-    data: coupons,
-  });
 }
 
 async function getCouponsDetail(req, res, next) {
@@ -336,10 +275,76 @@ async function deleteCoupons(req, res, next) {
   });
 }
 
+async function patchCoupons(req, res, next) {
+  try {
+    const { coupons_id } = req.params;
+    const { is_available } = req.body;
+
+    // 驗證參數
+    if (isUndefined(coupons_id) || !isValidString(coupons_id)) {
+      logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
+      return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+    }
+
+    // 驗證 is_available 參數
+    if (isUndefined(is_available) || typeof is_available !== "boolean") {
+      logger.warn("is_available 欄位必須是布林值");
+      return next(new AppError(400, "is_available 欄位必須是布林值"));
+    }
+
+    const couponRepo = dataSource.getRepository("Coupons");
+
+    // 檢查優惠券是否存在
+    const existingCoupon = await couponRepo.findOneBy({ id: coupons_id });
+    if (!existingCoupon) {
+      logger.warn(`優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`);
+      return next(new AppError(404, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+    }
+
+    // 檢查狀態是否有變更
+    if (existingCoupon.is_available === is_available) {
+      logger.warn(`優惠券狀態未改變`);
+      return next(new AppError(400, `優惠券狀態未改變`));
+    }
+
+    // 更新優惠券狀態
+    const updateResult = await couponRepo.update(
+      { id: coupons_id },
+      { is_available }
+    );
+
+    if (updateResult.affected === 0) {
+      logger.warn(`優惠券${ERROR_MESSAGES.DATA_UPDATE_FAILED}`);
+      return next(
+        new AppError(400, `優惠券${ERROR_MESSAGES.DATA_UPDATE_FAILED}`)
+      );
+    }
+
+    // 取得更新後的資料
+    const updatedCoupon = await couponRepo.findOneBy({ id: coupons_id });
+
+    logger.info(
+      `優惠券 ${coupons_id} 狀態已更新為: ${is_available ? "啟用" : "停用"}`
+    );
+
+    res.status(200).json({
+      status: true,
+      message: `優惠券已${is_available ? "啟用" : "停用"}`,
+      data: {
+        coupon: updatedCoupon,
+      },
+    });
+  } catch (error) {
+    logger.error("更新優惠券狀態失敗:", error);
+    return next(new AppError(500, "更新優惠券狀態失敗"));
+  }
+}
+
 module.exports = {
   getCoupons,
   getCouponsDetail,
   postCoupons,
   putCoupons,
+  patchCoupons,
   deleteCoupons,
 };
