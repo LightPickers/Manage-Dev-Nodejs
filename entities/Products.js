@@ -71,6 +71,14 @@ module.exports = new EntitySchema({
       type: "boolean",
       nullable: false,
     },
+    is_sold: {
+      type: "boolean",
+      nullable: true,
+    },
+    is_deleted: {
+      type: "boolean",
+      nullable: true,
+    },
     created_at: {
       type: "timestamp",
       createDate: true,
@@ -112,6 +120,11 @@ module.exports = new EntitySchema({
     },
     Favorites: {
       target: "Favorites",
+      type: "one-to-many",
+      inverseSide: "Products",
+    },
+    Product_images: {
+      target: "Product_images",
       type: "one-to-many",
       inverseSide: "Products",
     },
