@@ -534,8 +534,10 @@ async function getProducts(req, res, next) {
   const booleanFilters = { is_sold, is_available, is_featured };
   Object.entries(booleanFilters).forEach(([key, value]) => {
     if (value !== undefined) {
-      const parsedValue = isValidBoolean(value) ? Boolean(value) : null;
-
+      const parsedValue =
+        value === "true" ? true : value === "false" ? false : null;
+      // console.log(value);
+      // console.log(parsedValue);
       if (parsedValue === null) {
         logger.warn(`${key}錯誤: ${ERROR_MESSAGES.SEARCH_FORMAT_FAILED}`);
         errors[key] = ERROR_MESSAGES.SEARCH_FORMAT_FAILED;
