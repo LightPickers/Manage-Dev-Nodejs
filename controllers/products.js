@@ -1,4 +1,3 @@
-const { IsNull, In } = require("typeorm");
 const { dataSource } = require("../db/data-source");
 const logger = require("../utils/logger")("ProductsController");
 const {
@@ -11,160 +10,63 @@ const {
   isValidArrayOfURL,
   checkProductStatus,
 } = require("../utils/validUtils");
-const { validateFields } = require("../utils/validateFields");
-const { isValidQuillDelta } = require("../utils/validateQuillDelta");
-const { PRODUCTS_RULE } = require("../utils/validateRules");
+const { validateProductPayload } = require("../utils/productsValidator");
+const { isProductDataUnchanged } = require("../utils/productDataUnchange");
 const { isUUID } = require("validator");
+const _ = require("lodash");
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
 // API 37: 新增商品
 async function postProducts(req, res, next) {
-  const {
-    primary_image: primaryImage,
-    images,
-    name,
-    category_id: categoryId,
-    condition_id: conditionId,
-    summary,
-    title,
-    subtitle,
-    description,
-    is_available: isAvailable,
-    is_featured: isFeatured,
-    brand_id: brandId,
-    original_price: originalPrice,
-    selling_price: sellingPrice,
-    hashtags,
-  } = req.body;
+  const payload = req.body;
 
-  const errorFields = validateFields(
-    {
-      primaryImage,
-      name,
-      categoryId,
-      conditionId,
-      title,
-      subtitle,
-      isAvailable,
-      isFeatured,
-      brandId,
-      originalPrice,
-      sellingPrice,
-    },
-    PRODUCTS_RULE
-  );
-  if (errorFields) {
-    const errorMessages = errorFields.join(", ");
-    logger.warn(errorMessages);
-    return next(new AppError(400, errorMessages));
+  const errorMessage = validateProductPayload(payload);
+  if (errorMessage) {
+    logger.warn(errorMessage);
+    return next(new AppError(400, errorMessage));
   }
 
-  // 驗證 summary 欄位
-  if (isUndefined(summary) || !isValidArrayOfString(summary)) {
-    logger.warn(`Summary ${ERROR_MESSAGES.FIELDS_INCORRECT}`);
+  // 檢查類別、商品狀態、品牌 (合併執行以平行化)
+  const [category, condition, brand] = await Promise.all([
+    dataSource
+      .getRepository("Categories")
+      .findOneBy({ id: payload.category_id }),
+    dataSource
+      .getRepository("Conditions")
+      .findOneBy({ id: payload.condition_id }),
+    dataSource.getRepository("Brands").findOneBy({ id: payload.brand_id }),
+  ]);
+  if (!category || !condition || !brand) {
     return next(
-      new AppError(400, `Summary ${ERROR_MESSAGES.FIELDS_INCORRECT}`)
+      new AppError(404, `類別、商品狀態、品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`)
     );
-  }
-
-  // 驗證 description 欄位
-  if (isUndefined(description) || !isValidQuillDelta(description)) {
-    logger.warn(`description ${ERROR_MESSAGES.INVALID_QUILL_DELTA}`);
-    return next(
-      new AppError(400, `description ${ERROR_MESSAGES.INVALID_QUILL_DELTA}`)
-    );
-  }
-
-  if (!isValidUrl(primaryImage)) {
-    logger.warn(`商品主圖${ERROR_MESSAGES.URL_INCORRECT}`);
-    return next(new AppError(400, `商品主圖${ERROR_MESSAGES.URL_INCORRECT}`));
-  }
-  if (images && !isValidArrayOfURL(images)) {
-    logger.warn(`商品附圖${ERROR_MESSAGES.URL_INCORRECT}`);
-    return next(new AppError(400, `商品附圖${ERROR_MESSAGES.URL_INCORRECT}`));
-  }
-  if (hashtags && !isValidArrayOfString(hashtags)) {
-    logger.warn(`Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`);
-    return next(
-      new AppError(400, `Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`)
-    );
-  }
-
-  // 檢查 name, title, subtitle, images 字串長度
-  if (name.length > 100) {
-    logger.warn(`name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`);
-    return next(
-      new AppError(400, `name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`)
-    );
-  }
-  if (title.length > 50) {
-    logger.warn(`title ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`);
-    return next(
-      new AppError(400, `title ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`)
-    );
-  }
-  if (subtitle.length > 50) {
-    logger.warn(`subtitle ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`);
-    return next(
-      new AppError(400, `subtitle ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`)
-    );
-  }
-
-  if (images.length > 5) {
-    logger.warn(ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE);
-    return next(
-      new AppError(400, ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE)
-    );
-  }
-
-  // 檢查類別
-  const category = await dataSource
-    .getRepository("Categories")
-    .findOneBy({ id: categoryId });
-  if (!category) {
-    logger.warn(`類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(404, `類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
-  }
-  // 檢查商品狀態
-  const condition = await dataSource
-    .getRepository("Conditions")
-    .findOneBy({ id: conditionId });
-  if (!condition) {
-    logger.warn(`商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(404, `商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
-  }
-  // 檢查品牌
-  const brand = await dataSource
-    .getRepository("Brands")
-    .findOneBy({ id: brandId });
-  if (!brand) {
-    logger.warn(`品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(404, `品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
   const productsRepo = dataSource.getRepository("Products");
-  const newProducts = await productsRepo.create({
-    category_id: categoryId,
-    brand_id: brandId,
-    condition_id: conditionId,
-    name,
-    title,
-    subtitle,
-    hashtags,
-    description,
-    summary,
-    primary_image: primaryImage,
-    original_price: originalPrice,
-    selling_price: sellingPrice,
-    is_available: isAvailable,
-    is_featured: isFeatured,
+  const newProducts = productsRepo.create({
+    category_id: payload.category_id,
+    brand_id: payload.brand_id,
+    condition_id: payload.condition_id,
+    name: payload.name,
+    title: payload.title,
+    subtitle: payload.subtitle,
+    hashtags: payload.hashtags,
+    description: payload.description,
+    summary: payload.summary,
+    primary_image: payload.primary_image,
+    original_price: payload.original_price,
+    selling_price: payload.selling_price,
+    is_available: payload.is_available,
+    is_featured: payload.is_featured,
+    is_sold: payload.is_sold,
+    is_deleted: payload.is_deleted,
   });
   const savedProducts = await productsRepo.save(newProducts);
 
-  if (images) {
+  if (payload.images) {
     const productImagesRepo = dataSource.getRepository("Product_images");
-    const newProductImages = images.map((imageUrl) =>
+    const newProductImages = payload.images.map((imageUrl) =>
       productImagesRepo.create({
         product_id: savedProducts.id,
         image: imageUrl,
@@ -182,127 +84,26 @@ async function postProducts(req, res, next) {
 // API 38: 修改商品
 async function putProducts(req, res, next) {
   const { product_id } = req.params;
-  const {
-    primary_image: primaryImage,
-    images,
-    name,
-    category_id: categoryId,
-    condition_id: conditionId,
-    summary,
-    title,
-    subtitle,
-    description,
-    is_available: isAvailable,
-    is_featured: isFeatured,
-    brand_id: brandId,
-    original_price: originalPrice,
-    selling_price: sellingPrice,
-    hashtags,
-  } = req.body;
+  const payload = req.body;
 
-  const errorFields = validateFields(
-    {
-      primaryImage,
-      name,
-      categoryId,
-      conditionId,
-      title,
-      subtitle,
-      isAvailable,
-      isFeatured,
-      brandId,
-      originalPrice,
-      sellingPrice,
-    },
-    PRODUCTS_RULE
-  );
-  if (errorFields) {
-    const errorMessages = errorFields.join(", ");
-    logger.warn(errorMessages);
-    return next(new AppError(400, errorMessages));
+  const errorMessage = validateProductPayload(payload);
+  if (errorMessage) {
+    logger.warn(errorMessage);
+    return next(new AppError(400, errorMessage));
   }
 
-  // 驗證 summary 欄位
-  if (isUndefined(summary) || !isValidArrayOfString(summary)) {
-    logger.warn(`Summary ${ERROR_MESSAGES.FIELDS_INCORRECT}`);
-    return next(
-      new AppError(400, `Summary ${ERROR_MESSAGES.FIELDS_INCORRECT}`)
-    );
-  }
-
-  // 驗證 description 欄位
-  if (isUndefined(description) || !isValidQuillDelta(description)) {
-    logger.warn(`description ${ERROR_MESSAGES.INVALID_QUILL_DELTA}`);
-    return next(
-      new AppError(400, `description ${ERROR_MESSAGES.INVALID_QUILL_DELTA}`)
-    );
-  }
-
-  if (!isValidUrl(primaryImage)) {
-    logger.warn(`商品主圖${ERROR_MESSAGES.URL_INCORRECT}`);
-    return next(new AppError(400, `商品主圖${ERROR_MESSAGES.URL_INCORRECT}`));
-  }
-  if (images && !isValidArrayOfURL(images)) {
-    logger.warn(`商品附圖${ERROR_MESSAGES.URL_INCORRECT}`);
-    return next(new AppError(400, `商品附圖${ERROR_MESSAGES.URL_INCORRECT}`));
-  }
-  if (hashtags && !isValidArrayOfString(hashtags)) {
-    logger.warn(`Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`);
-    return next(
-      new AppError(400, `Hashtags${ERROR_MESSAGES.FIELDS_INCORRECT}`)
-    );
-  }
-
-  // 檢查 name, title, subtitle, images 字串長度
-  if (name.length > 100) {
-    logger.warn(`name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`);
-    return next(
-      new AppError(400, `name ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 100`)
-    );
-  }
-  if (title.length > 50) {
-    logger.warn(`title ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`);
-    return next(
-      new AppError(400, `title ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`)
-    );
-  }
-  if (subtitle.length > 50) {
-    logger.warn(`subtitle ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`);
-    return next(
-      new AppError(400, `subtitle ${ERROR_MESSAGES.LIMIT_STRING_LENGTH} 50`)
-    );
-  }
-
-  if (images.length > 5) {
-    logger.warn(ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE);
-    return next(
-      new AppError(400, ERROR_MESSAGES.PRODUCT_IMAGES_NOT_MORE_THAN_FIVE)
-    );
-  }
-
-  // 檢查類別
-  const category = await dataSource
-    .getRepository("Categories")
-    .findOneBy({ id: categoryId });
-  if (!category) {
-    logger.warn(`類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(404, `類別 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
-  }
-  // 檢查商品狀態
-  const condition = await dataSource
-    .getRepository("Conditions")
-    .findOneBy({ id: conditionId });
-  if (!condition) {
-    logger.warn(`商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(404, `商品狀態 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
-  }
-  // 檢查品牌
-  const brand = await dataSource
-    .getRepository("Brands")
-    .findOneBy({ id: brandId });
-  if (!brand) {
-    logger.warn(`品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
-    return next(new AppError(404, `品牌 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
+  // 檢查類別、商品狀態、品牌
+  const [category, condition, brand] = await Promise.all([
+    dataSource
+      .getRepository("Categories")
+      .findOneBy({ id: payload.category_id }),
+    dataSource
+      .getRepository("Conditions")
+      .findOneBy({ id: payload.condition_id }),
+    dataSource.getRepository("Brands").findOneBy({ id: payload.brand_id }),
+  ]);
+  if (!category || !condition || !brand) {
+    return next(new AppError(404, `基本資料 ${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
   // 資料是否存在
@@ -334,37 +135,8 @@ async function putProducts(req, res, next) {
     where: { product_id },
   });
 
-  const hashtagsEqual =
-    product.hashtags.length === hashtags.length &&
-    [...product.hashtags]
-      .sort()
-      .every((tag, i) => tag === [...hashtags].sort()[i]);
-
-  // 比對圖片內容
-  const dbImages = productImages.map((obj) => obj.image.trim()).sort();
-  const requestImages = images.map((img) => img.trim()).sort();
-
-  const imagesEqual =
-    dbImages.length === requestImages.length &&
-    dbImages.every((img, i) => img === requestImages[i]);
-
-  if (
-    product.primary_image === primaryImage &&
-    imagesEqual &&
-    product.name === name &&
-    product.category_id === categoryId &&
-    product.condition_id === conditionId &&
-    product.summary === summary &&
-    product.title === title &&
-    product.subtitle === subtitle &&
-    product.description === description &&
-    product.is_available === isAvailable &&
-    product.is_featured === isFeatured &&
-    product.original_price === originalPrice &&
-    product.brand_id === brandId &&
-    product.selling_price === sellingPrice &&
-    hashtagsEqual
-  ) {
+  const isUnchanged = isProductDataUnchanged(product, payload, productImages);
+  if (isUnchanged) {
     logger.warn(`商品${ERROR_MESSAGES.DATA_NOT_CHANGE}`);
     return next(new AppError(400, `商品${ERROR_MESSAGES.DATA_NOT_CHANGE}`));
   }
@@ -372,20 +144,22 @@ async function putProducts(req, res, next) {
   const updateResult = await productsRepo.update(
     { id: product_id },
     {
-      primary_image: primaryImage,
-      name,
-      category_id: categoryId,
-      condition_id: conditionId,
-      summary,
-      title,
-      subtitle,
-      description,
-      is_available: isAvailable,
-      is_featured: isFeatured,
-      brand_id: brandId,
-      original_price: originalPrice,
-      selling_price: sellingPrice,
-      hashtags,
+      primary_image: payload.primary_image,
+      name: payload.name,
+      category_id: payload.category_id,
+      condition_id: payload.condition_id,
+      summary: payload.summary,
+      title: payload.title,
+      subtitle: payload.subtitle,
+      description: payload.description,
+      is_available: payload.is_available,
+      is_featured: payload.is_featured,
+      brand_id: payload.brand_id,
+      original_price: payload.original_price,
+      selling_price: payload.selling_price,
+      hashtags: payload.hashtags,
+      is_sold: payload.is_sold,
+      is_deleted: payload.is_deleted,
     }
   );
 
@@ -395,14 +169,19 @@ async function putProducts(req, res, next) {
   }
 
   // 如果圖片不同，先刪除舊圖片後，再加上新圖片
-  if (!imagesEqual) {
+  const dbImages = productImages.map((obj) => obj.image.trim()).sort();
+  const requestImages = payload.images.map((img) => img.trim()).sort();
+
+  if (!_.isEqual(dbImages, requestImages)) {
     const productsImagesRepo = dataSource.getRepository("Product_images");
     await productsImagesRepo.delete({ product_id });
 
-    const newProductImages = requestImages.map((imageUrl) =>
-      productsImagesRepo.create({ product_id, image: imageUrl })
-    );
-    await productsImagesRepo.save(newProductImages);
+    if (requestImages.length > 0) {
+      const newProductImages = requestImages.map((imageUrl) =>
+        productsImagesRepo.create({ product_id, image: imageUrl })
+      );
+      await productsImagesRepo.save(newProductImages);
+    }
   }
 
   res.status(200).json({

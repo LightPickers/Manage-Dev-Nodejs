@@ -7,6 +7,35 @@ const {
   isValidQuillImage,
 } = require("./validUtils");
 
+const validAttrs = {
+  bold: "boolean",
+  italic: "boolean",
+  underline: "boolean",
+  strike: "boolean",
+  color: "string",
+  background: "string",
+  font: "string",
+  size: "string",
+  link: "string",
+  code: "boolean",
+  script: ["sub", "super"],
+  header: ["1", "2", "3", "4", "5", "6", true],
+  blockquote: "boolean",
+  list: ["ordered", "bullet", "checked", "unchecked"],
+  align: ["right", "center", "justify"],
+  indent: "number",
+  direction: ["rtl"],
+};
+
+function isValidAttributeValue(key, value) {
+  const expected = validAttrs[key];
+  if (expected === "boolean") return typeof value === "boolean";
+  if (expected === "string") return typeof value === "string";
+  if (expected === "number") return typeof value === "number";
+  if (Array.isArray(expected)) return expected.includes(value);
+  return false;
+}
+
 function isValidQuillDelta(delta) {
   // 確認是物件，且有 ops 陣列
   if (
@@ -41,9 +70,8 @@ function isValidQuillDelta(delta) {
         return false;
       }
 
-      const validAttrs = ["bold", "italic", "underline", "strike"];
       for (const [key, value] of Object.entries(attrs)) {
-        if (!validAttrs.includes(key) || !isValidBoolean(value)) {
+        if (!(key in validAttrs) || !isValidAttributeValue(key, value)) {
           return false;
         }
       }

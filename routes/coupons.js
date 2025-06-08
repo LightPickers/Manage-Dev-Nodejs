@@ -29,4 +29,11 @@ router.delete(
   handleErrorAsync(couponsController.deleteCoupons)
 );
 
+router.patch(
+  "/:coupons_id",
+  isAuth,
+  isAdmin,
+  handleErrorAsync(couponsController.patchCoupons)
+);
+
 module.exports = router;
