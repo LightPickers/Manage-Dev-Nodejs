@@ -73,11 +73,11 @@ module.exports = new EntitySchema({
     },
     is_sold: {
       type: "boolean",
-      nullable: true,
+      nullable: false,
     },
     is_deleted: {
       type: "boolean",
-      nullable: true,
+      nullable: false,
     },
     created_at: {
       type: "timestamp",
