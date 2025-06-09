@@ -105,28 +105,12 @@ async function putProducts(req, res, next) {
   }
 
   // 資料是否存在
-  const productStatus = await checkProductStatus(
-    productsRepo,
-    product_id,
-    false
-  );
-  if (!productStatus.success) {
-    switch (productStatus.error) {
-      case ERROR_MESSAGES.PRODUCT_DELISTED:
-        return; // 商品下架，後台仍可更新商品資訊
-      default:
-        return next(new AppError(404, productStatus.error));
-    }
-  }
-
-  /*
   const productsRepo = dataSource.getRepository("Products");
   const product = await productsRepo.findOneBy({ id: product_id });
   if (!product) {
     logger.warn(`商品 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
     return next(new AppError(404, `商品${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
-  */
 
   const productImages = await dataSource.getRepository("Product_images").find({
     select: ["image"],
