@@ -21,8 +21,6 @@ const PRODUCTS_RULE = {
   brandId: "string",
   originalPrice: "number",
   sellingPrice: "number",
-  isSold: "boolean",
-  isDeleted: "boolean",
 };
 
 const PAGE_PER_RULE = {
