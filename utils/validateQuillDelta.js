@@ -19,7 +19,7 @@ const validAttrs = {
   link: "string",
   code: "boolean",
   script: ["sub", "super"],
-  header: ["1", "2", "3", "4", "5", "6", true],
+  header: [1, 2, 3, 4, 5, 6, true],
   blockquote: "boolean",
   list: ["ordered", "bullet", "checked", "unchecked"],
   align: ["right", "center", "justify"],
