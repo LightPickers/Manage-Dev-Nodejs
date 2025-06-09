@@ -59,8 +59,6 @@ async function postProducts(req, res, next) {
     selling_price: payload.selling_price,
     is_available: payload.is_available,
     is_featured: payload.is_featured,
-    is_sold: payload.is_sold,
-    is_deleted: payload.is_deleted,
   });
   const savedProducts = await productsRepo.save(newProducts);
 
@@ -158,8 +156,6 @@ async function putProducts(req, res, next) {
       original_price: payload.original_price,
       selling_price: payload.selling_price,
       hashtags: payload.hashtags,
-      is_sold: payload.is_sold,
-      is_deleted: payload.is_deleted,
     }
   );
 

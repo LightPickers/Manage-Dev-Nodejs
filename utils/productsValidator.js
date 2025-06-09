@@ -26,8 +26,6 @@ function validateProductPayload(payload) {
     original_price: originalPrice,
     selling_price: sellingPrice,
     hashtags,
-    is_sold: isSold,
-    is_deleted: isDeleted,
   } = payload;
 
   const errorFields = validateFields(
@@ -43,8 +41,6 @@ function validateProductPayload(payload) {
       brandId,
       originalPrice,
       sellingPrice,
-      isSold,
-      isDeleted,
     },
     PRODUCTS_RULE
   );
