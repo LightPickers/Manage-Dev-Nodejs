@@ -119,14 +119,12 @@ async function putProducts(req, res, next) {
     }
   }
 
-  /*
   const productsRepo = dataSource.getRepository("Products");
   const product = await productsRepo.findOneBy({ id: product_id });
   if (!product) {
     logger.warn(`商品 ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
     return next(new AppError(404, `商品${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
-  */
 
   const productImages = await dataSource.getRepository("Product_images").find({
     select: ["image"],
