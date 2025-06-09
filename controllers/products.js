@@ -133,6 +133,7 @@ async function putProducts(req, res, next) {
     where: { product_id },
   });
 
+  // 驗證資料是否未改變
   const isUnchanged = isProductDataUnchanged(product, payload, productImages);
   if (isUnchanged) {
     logger.warn(`商品${ERROR_MESSAGES.DATA_NOT_CHANGE}`);
