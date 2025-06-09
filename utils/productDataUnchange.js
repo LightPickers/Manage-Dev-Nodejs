@@ -13,8 +13,6 @@ function isProductDataUnchanged(product, payload, productImages) {
     "brand_id",
     "original_price",
     "selling_price",
-    "is_sold",
-    "is_deleted",
   ];
 
   for (const field of fieldsToCompare) {
