@@ -8,6 +8,7 @@ const {
   isValidUrl,
   isValidArrayOfString,
   isValidArrayOfURL,
+  checkExisted,
   checkProductStatus,
 } = require("../utils/validUtils");
 const { validateProductPayload } = require("../utils/productsValidator");
@@ -471,7 +472,30 @@ async function pullProducts(req, res, next) {
   }
 
   const productsRepo = dataSource.getRepository("Products");
+  const product = await productsRepo.findOne({
+    select: { id: true },
+    where: {
+      id: product_info.product_id,
+      is_available: true, // 限定同時條件
+    },
+  });
+
+  if (!product) {
+    // 判斷是「不存在」還是「已下架」
+    const productExists = checkExisted(productsRepo, product.id);
+    if (!productExists) {
+      logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
+      return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
+    } else {
+      logger.warn(ERROR_MESSAGES.PRODUCT_PULLED);
+      return next(new AppError(400, ERROR_MESSAGES.PRODUCT_PULLED));
+    }
+  }
+
+  // 舊的檢查方式(呼叫DB兩次)
+  /*
   const existProduct = await productsRepo.findOne({
+    select: {id: true, is_available: true},
     where: { id: product_info.product_id },
   });
 
@@ -480,10 +504,12 @@ async function pullProducts(req, res, next) {
     return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
   }
 
-  if (!product_info.is_available) {
+  if (!existProduct.is_available) {
     logger.warn(ERROR_MESSAGES.PRODUCT_PULLED);
     return next(new AppError(400, ERROR_MESSAGES.PRODUCT_PULLED));
   }
+  */
+
   await productsRepo.update(
     { id: product_info.product_id },
     { is_available: false }
