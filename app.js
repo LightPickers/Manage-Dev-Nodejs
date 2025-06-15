@@ -9,7 +9,7 @@ const usersRouter = require("./routes/users");
 const couponsRouter = require("./routes/coupons");
 const productsRouter = require("./routes/products");
 // const uploadRouter = require("./routes/upload");
-app.use("/api/v1/health", healthRouter);
+const healthRouter = require("./routes/health.js");
 
 const app = express();
 
