@@ -406,6 +406,7 @@ async function getProducts(req, res, next) {
     status: true,
     message: selectedProducts.length === 0 ? "找不到搜尋商品" : undefined,
     total_pages,
+    total_product: total,
     data: result,
   });
 }
