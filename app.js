@@ -34,7 +34,7 @@ app.use("/api/v1/admin/users", usersRouter);
 app.use("/api/v1/admin/coupons", couponsRouter);
 app.use("/api/v1/admin/products", productsRouter);
 // app.use("/api/v1/upload/image", uploadRouter);
-app.use("/api/v1/health", healthRouter);
+app.use("/api/v1/admin/health", healthRouter);
 
 //404
 app.use((req, res, next) => {
