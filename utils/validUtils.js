@@ -64,7 +64,7 @@ function isValidQuillImage(value) {
 
 // 檢查商品是否存在
 async function checkExisted(productsRepo, product_id) {
-  return await productsRepo.findOne({
+  return await productsRepo.exist({
     where: { id: product_id },
   });
 }
@@ -103,11 +103,15 @@ async function checkDeleted(productsRepo, product_id) {
 async function checkProductStatus(productsRepo, product_id, inventory) {
   const product = await productsRepo
     .createQueryBuilder("product")
-    .select(["id", "is_deleted", "is_available", "is_sold"])
+    .select([
+      "product.id",
+      "product.selling_price",
+      "product.is_deleted",
+      "product.is_available",
+      "product.is_sold",
+    ])
     .where("product.id = :product_id", { product_id })
-    .getRawOne();
-
-  console.log(product);
+    .getOne();
 
   if (!product) {
     logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
@@ -120,19 +124,15 @@ async function checkProductStatus(productsRepo, product_id, inventory) {
   }
 
   if (!product.is_available) {
-    console.log(product.is_available);
     logger.warn(ERROR_MESSAGES.PRODUCT_DELISTED);
     return { success: false, error: ERROR_MESSAGES.PRODUCT_DELISTED };
   }
 
-  if (inventory) {
-    if (product.is_sold) {
-      logger.warn(ERROR_MESSAGES.PRODUCT_SOLDOUT);
-      return { success: false, error: ERROR_MESSAGES.PRODUCT_SOLDOUT };
-    }
+  if (inventory && product.is_sold) {
+    logger.warn(ERROR_MESSAGES.PRODUCT_SOLDOUT);
+    return { success: false, error: ERROR_MESSAGES.PRODUCT_SOLDOUT };
   }
-
-  return { success: true };
+  return { success: true, product };
 }
 
 module.exports = {

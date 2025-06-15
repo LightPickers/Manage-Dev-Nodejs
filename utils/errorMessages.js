@@ -51,6 +51,7 @@ const ERROR_MESSAGES = {
   PRODUCT_DELISTED: "商品已下架",
   PRODUCT_DELETED: "商品已刪除",
   SEARCH_FORMAT_FAILED: "篩選格式錯誤",
+  PRODUCT_SHELVED: "商品已上架",
 };
 
 module.exports = ERROR_MESSAGES;
