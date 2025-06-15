@@ -377,6 +377,7 @@ async function getProducts(req, res, next) {
       "product.is_available",
     ])
     .orderBy("product.created_at", "DESC")
+    .addOrderBy("product.id", "DESC") // 避免時間相同排序混亂
     .skip(offset)
     .take(pageSizeInt)
     .getManyAndCount();
@@ -459,7 +460,7 @@ async function pullProducts(req, res, next) {
   const product_info = {
     ...req.body,
     product_id: req.body.id,
-    is_available: req.body.available,
+    // is_available: req.body.available,
   };
 
   if (
@@ -482,11 +483,16 @@ async function pullProducts(req, res, next) {
 
   if (!product) {
     // 判斷是「不存在」還是「已下架」
-    const productExists = checkExisted(productsRepo, product.id);
+    const productExists = await checkExisted(
+      productsRepo,
+      product_info.product_id
+    );
+
     if (!productExists) {
       logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
       return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
     } else {
+      console.log(productExists);
       logger.warn(ERROR_MESSAGES.PRODUCT_PULLED);
       return next(new AppError(400, ERROR_MESSAGES.PRODUCT_PULLED));
     }
@@ -597,6 +603,60 @@ async function getPreFilledInfo(req, res, next) {
   });
 }
 
+// 重新上架商品
+async function shelvedProducts(req, res, next) {
+  const product_info = {
+    ...req.body,
+    product_id: req.body.id,
+    // is_available: req.body.available,
+  };
+
+  if (
+    isUndefined(product_info.product_id) ||
+    !isValidString(product_info.product_id) ||
+    !isUUID(product_info.product_id, 4)
+  ) {
+    logger.warn(ERROR_MESSAGES.FIELDS_INCORRECT);
+    return next(new AppError(400, ERROR_MESSAGES.FIELDS_INCORRECT));
+  }
+
+  const productsRepo = dataSource.getRepository("Products");
+  const product = await productsRepo.findOne({
+    select: { id: true },
+    where: {
+      id: product_info.product_id,
+      is_available: false, // 限定同時條件
+    },
+  });
+
+  if (!product) {
+    // 判斷是「不存在」還是「在架上」
+    const productExists = await checkExisted(
+      productsRepo,
+      product_info.product_id
+    );
+
+    if (!productExists) {
+      logger.warn(ERROR_MESSAGES.DATA_NOT_FOUND);
+      return next(new AppError(409, ERROR_MESSAGES.DATA_NOT_FOUND));
+    } else {
+      console.log(productExists);
+      logger.warn(ERROR_MESSAGES.PRODUCT_SHELVED);
+      return next(new AppError(400, ERROR_MESSAGES.PRODUCT_SHELVED));
+    }
+  }
+
+  await productsRepo.update(
+    { id: product_info.product_id },
+    { is_available: true }
+  );
+
+  res.status(200).json({
+    status: "true",
+    message: "商品已重新上架",
+  });
+}
+
 module.exports = {
   postProducts,
   putProducts,
@@ -604,4 +664,5 @@ module.exports = {
   deleteProducts,
   pullProducts,
   getPreFilledInfo,
+  shelvedProducts,
 };
