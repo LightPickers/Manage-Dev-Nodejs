@@ -8,7 +8,8 @@ const loginRouter = require("./routes/login");
 const usersRouter = require("./routes/users");
 const couponsRouter = require("./routes/coupons");
 const productsRouter = require("./routes/products");
-const uploadRouter = require("./routes/upload");
+// const uploadRouter = require("./routes/upload");
+const healthRouter = require("./routes/health.js");
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/v1/admin/users", usersRouter);
 app.use("/api/v1/admin/coupons", couponsRouter);
 app.use("/api/v1/admin/products", productsRouter);
 // app.use("/api/v1/upload/image", uploadRouter);
+app.use("/api/v1/admin/health", healthRouter);
 
 //404
 app.use((req, res, next) => {
