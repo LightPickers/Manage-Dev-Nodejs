@@ -40,5 +40,11 @@ router.get(
   isAdmin,
   handleErrorAsync(productsController.getPreFilledInfo)
 );
+router.patch(
+  "/shelved",
+  isAuth,
+  isAdmin,
+  handleErrorAsync(productsController.shelvedProducts)
+);
 
 module.exports = router;
