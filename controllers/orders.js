@@ -177,6 +177,9 @@ async function getOrdersDetail(req, res, next) {
     .setParameters({ shippingFee })
     .getRawOne();
 
+  // 在 orderInfo 新增 shippingFee 運費
+  orderInfo.shippingFee = shippingFee;
+
   const orderItems = await orderItemsRepo
     .createQueryBuilder("orderItems")
     .leftJoinAndSelect("orderItems.Products", "product")
