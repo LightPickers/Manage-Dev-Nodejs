@@ -41,6 +41,14 @@ const QUARY_KEYWORD_RULE = {
   keyword: "string",
 };
 
+const QUARY_ORDER_MERCHANT_ORDER_NO_RULE = {
+  order_merchant_order_no: "string",
+};
+
+const PATCH_ORDERS_RULE = {
+  status: "string",
+};
+
 module.exports = {
   COUPONS_RULE,
   PRODUCTS_RULE,
@@ -48,4 +56,6 @@ module.exports = {
   PAGENUMBER_PERNUMBER_RULE,
   QUARY_NAME_RULE,
   QUARY_KEYWORD_RULE,
+  QUARY_ORDER_MERCHANT_ORDER_NO_RULE,
+  PATCH_ORDERS_RULE,
 };
