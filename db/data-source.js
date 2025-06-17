@@ -10,6 +10,8 @@ const Products = require("../entities/Products");
 const Product_images = require("../entities/Product_images");
 const Users = require("../entities/Users");
 const Roles = require("../entities/Roles");
+const Orders = require("../entities/Orders");
+const Order_items = require("../entities/Order_items");
 
 const dataSource = new DataSource({
   type: "postgres",
@@ -30,6 +32,8 @@ const dataSource = new DataSource({
     Product_images,
     Users,
     Roles,
+    Orders,
+    Order_items,
   ],
   ssl: config.get("db.ssl"),
 });
