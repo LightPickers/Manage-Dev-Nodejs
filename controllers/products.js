@@ -10,6 +10,7 @@ const {
   isValidArrayOfURL,
   checkExisted,
   checkProductStatus,
+  isValidId,
 } = require("../utils/validUtils");
 const { validateProductPayload } = require("../utils/productsValidator");
 const { isProductDataUnchanged } = require("../utils/productDataUnchange");

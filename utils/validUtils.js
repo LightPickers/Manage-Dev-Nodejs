@@ -2,6 +2,7 @@ const validator = require("validator");
 const PATTERN_RULE = require("./validatePatterns");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 const logger = require("../utils/logger")("UsersController");
+const PATTERN_RULE = require("./validatePatterns");
 
 function isUndefined(value) {
   return value === undefined;
@@ -135,6 +136,10 @@ async function checkProductStatus(productsRepo, product_id, inventory) {
   return { success: true, product };
 }
 
+function isValidId(value) {
+  return PATTERN_RULE.ID_PATTERN.test(value);
+}
+
 module.exports = {
   isUndefined,
   isValidString,
@@ -156,4 +161,5 @@ module.exports = {
   checkSold,
   checkDeleted,
   checkProductStatus,
+  isValidId,
 };
