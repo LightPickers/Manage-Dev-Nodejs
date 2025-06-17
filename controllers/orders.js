@@ -1,4 +1,4 @@
-const logger = require("../utils/logger")("Coupons");
+const logger = require("../utils/logger")("Orders");
 const { dataSource } = require("../db/data-source");
 const { isUUID } = require("validator");
 const { isUndefined, isValidString } = require("../utils/validUtils");
@@ -6,8 +6,8 @@ const { validateFields } = require("../utils/validateFields");
 const {
   PAGE_PER_RULE,
   PAGENUMBER_PERNUMBER_RULE,
-  QUARY_ORDER_MERCHANT_ORDER_NO_RULE,
-  QUARY_KEYWORD_RULE,
+  QUERY_STATUS_RULE,
+  QUERY_KEYWORD_RULE,
   PATCH_ORDERS_RULE,
 } = require("../utils/validateRules");
 const { isValidOrderStatus } = require("../utils/validOrderStatus");
@@ -15,7 +15,7 @@ const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 
 async function getOrders(req, res, next) {
-  const { page, per, order_merchant_order_no, keyword } = req.query;
+  const { page, per, status, keyword } = req.query;
   const errorFields = validateFields(
     {
       page,
@@ -70,35 +70,29 @@ async function getOrders(req, res, next) {
     .take(perNumber);
 
   // 判斷網址中的 order_merchant_order_no 是否有值，並驗證欄位
-  if (order_merchant_order_no) {
-    const errorFields = validateFields(
-      { order_merchant_order_no },
-      QUARY_ORDER_MERCHANT_ORDER_NO_RULE
-    );
+  if (status) {
+    const errorFields = validateFields({ status }, QUERY_STATUS_RULE);
     if (errorFields) {
       const errorMessage = errorFields;
       logger.warn(errorMessage);
       return next(new AppError(400, errorMessage));
     } else {
-      queryBuilder.andWhere(
-        "order.merchant_order_no = :order.merchant_order_no",
-        {
-          order_merchant_order_no,
-        }
-      ); //使用 訂單藍新編號 來做查詢
+      queryBuilder.andWhere("order.status = :status", {
+        status,
+      }); //使用 訂單狀態 來做查詢
     }
   }
 
   // 判斷網址中的 keyword 是否有值，並驗證欄位
   if (keyword) {
-    const errorFields = validateFields({ keyword }, QUARY_KEYWORD_RULE);
+    const errorFields = validateFields({ keyword }, QUERY_KEYWORD_RULE);
     if (errorFields) {
       const errorMessage = errorFields;
       logger.warn(errorMessage);
       return next(new AppError(400, errorMessage));
     } else {
       queryBuilder.andWhere(
-        "(order.status LIKE :keyword OR user.email LIKE :keyword)", // 以 訂單狀態 或 使用者email 進行搜尋
+        "(order.merchant_order_no LIKE :keyword OR user.email LIKE :keyword)", // 以 訂單藍新編號 或 使用者email 進行搜尋
         { keyword: `%${keyword}%` }
       );
     }
