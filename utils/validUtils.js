@@ -2,7 +2,6 @@ const validator = require("validator");
 const PATTERN_RULE = require("./validatePatterns");
 const ERROR_MESSAGES = require("../utils/errorMessages");
 const logger = require("../utils/logger")("UsersController");
-const PATTERN_RULE = require("./validatePatterns");
 
 function isUndefined(value) {
   return value === undefined;
