@@ -110,7 +110,7 @@ async function getUsers(req, res, next) {
   ]);
 
   // 計算 總頁數
-  const totalPages = Math.ceil(totalUsers / per);
+  const totalPages = Math.ceil(totalUsers / perNumber);
 
   res.status(200).json({
     status: true,
