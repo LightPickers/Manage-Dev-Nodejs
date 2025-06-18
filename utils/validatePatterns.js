@@ -6,6 +6,7 @@ const PATTERN_RULE = {
   PHONE_PATTERN: /^(09\d{8})$/,
   ZIPCODE_PATTERN: /^\d{3}$/,
   EMAIL_PATTERN: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  ID_PATTERN: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
 };
 
 module.exports = PATTERN_RULE;

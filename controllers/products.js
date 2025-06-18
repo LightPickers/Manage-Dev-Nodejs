@@ -10,6 +10,7 @@ const {
   isValidArrayOfURL,
   checkExisted,
   checkProductStatus,
+  isValidId,
 } = require("../utils/validUtils");
 const { validateProductPayload } = require("../utils/productsValidator");
 const { isProductDataUnchanged } = require("../utils/productDataUnchange");
@@ -553,7 +554,8 @@ async function getPreFilledInfo(req, res, next) {
   if (!productStatus.success) {
     switch (productStatus.error) {
       case ERROR_MESSAGES.PRODUCT_DELISTED:
-        return; // 商品下架，後台仍可看到該商品詳細資訊
+        // console.log(productStatus);
+        break; // 商品下架，後台仍可看到該商品詳細資訊
       default:
         return next(new AppError(404, productStatus.error));
     }
