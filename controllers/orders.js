@@ -165,7 +165,7 @@ async function getOrdersDetail(req, res, next) {
       "order.payment_method AS payment_method",
       "order.desired_date AS desired_date",
       "(order.amount - :shippingFee) / COALESCE(coupon.discount, 10) * 10 AS items_total_amount", // 計算品項總金額
-      "(order.amount - :shippingFee) / COALESCE(coupon.discount, 10) * (10 - COALESCE(coupon.discount, 0)) AS discount_amount", // 計算折扣金額
+      "((order.amount - :shippingFee) / COALESCE(coupon.discount, 10) * 10) - (order.amount - :shippingFee) AS discount_amount", // 計算折扣金額
     ])
     .where("order.id = :order_id", { order_id })
     .setParameters({ shippingFee })
