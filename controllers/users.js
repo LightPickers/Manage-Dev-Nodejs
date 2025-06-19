@@ -4,8 +4,8 @@ const { validateFields } = require("../utils/validateFields");
 const {
   PAGE_PER_RULE,
   PAGENUMBER_PERNUMBER_RULE,
-  QUARY_NAME_RULE,
-  QUARY_KEYWORD_RULE,
+  QUERY_NAME_RULE,
+  QUERY_KEYWORD_RULE,
 } = require("../utils/validateRules");
 const AppError = require("../utils/appError");
 const ERROR_MESSAGES = require("../utils/errorMessages");
@@ -78,7 +78,7 @@ async function getUsers(req, res, next) {
 
   // 判斷網址中的 name 是否有值，並驗證欄位
   if (name) {
-    const nameErrorFields = validateFields({ name }, QUARY_NAME_RULE);
+    const nameErrorFields = validateFields({ name }, QUERY_NAME_RULE);
     if (nameErrorFields) {
       const errorMessage = nameErrorFields;
       logger.warn(errorMessage);
@@ -90,7 +90,7 @@ async function getUsers(req, res, next) {
 
   // 判斷網址中的 keyword 是否有值，並驗證欄位
   if (keyword) {
-    const keywordErrorFields = validateFields({ keyword }, QUARY_KEYWORD_RULE);
+    const keywordErrorFields = validateFields({ keyword }, QUERY_KEYWORD_RULE);
     if (keywordErrorFields) {
       const errorMessage = keywordErrorFields;
       logger.warn(errorMessage);
@@ -110,7 +110,7 @@ async function getUsers(req, res, next) {
   ]);
 
   // 計算 總頁數
-  const totalPages = Math.ceil(totalUsers / per);
+  const totalPages = Math.ceil(totalUsers / perNumber);
 
   res.status(200).json({
     status: true,

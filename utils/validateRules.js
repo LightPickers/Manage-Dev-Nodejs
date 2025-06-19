@@ -33,12 +33,23 @@ const PAGENUMBER_PERNUMBER_RULE = {
   perNumber: "number",
 };
 
-const QUARY_NAME_RULE = {
+// getUsers
+const QUERY_NAME_RULE = {
   name: "string",
 };
-
-const QUARY_KEYWORD_RULE = {
+// getUsers, getOrders
+const QUERY_KEYWORD_RULE = {
   keyword: "string",
+};
+
+// getOrders
+const QUERY_STATUS_RULE = {
+  status: "string",
+};
+
+// patchOrders
+const PATCH_ORDERS_RULE = {
+  status: "string",
 };
 
 module.exports = {
@@ -46,6 +57,8 @@ module.exports = {
   PRODUCTS_RULE,
   PAGE_PER_RULE,
   PAGENUMBER_PERNUMBER_RULE,
-  QUARY_NAME_RULE,
-  QUARY_KEYWORD_RULE,
+  QUERY_NAME_RULE,
+  QUERY_KEYWORD_RULE,
+  QUERY_STATUS_RULE,
+  PATCH_ORDERS_RULE,
 };
