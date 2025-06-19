@@ -29,12 +29,8 @@
 - **後端語言**：Node.js
 - **後端框架**：Express
 - **資料庫**：PostgreSQL
-- **部署平台**：Render（Web, PostgreSQL）+ Redis Cloud
+- **部署平台**：Render（Web, PostgreSQL）
 - **身分驗證**：JWT、Bcrypt
-- **金流整合**：藍新金流 newebpay（含 AES 加密 / SHA256）
-- **快取**：Redis
-- **排程**：node-cron (搭配 Redis)
-- **AI客服**：openAI
 - **Log 工具**：Pino（搭配 pino-pretty，方便開發時格式化 log）
 
 ---
