@@ -115,7 +115,16 @@ async function postCoupons(req, res, next) {
     );
   }
 
-  if (endAt <= startAt) {
+  startAtTime = new Date(startAt).toISOString();
+  endAtTime = new Date(endAt).toISOString();
+  const now = new Date();
+
+  if (startAtTime < now) {
+    logger.warn(ERROR_MESSAGES.COUPON_START_BEFORE_NOW);
+    return next(new AppError(400, ERROR_MESSAGES.COUPON_START_BEFORE_NOW));
+  }
+
+  if (endAtTime <= startAtTime) {
     logger.warn(ERROR_MESSAGES.COUPON_END_BEFORE_START);
     return next(new AppError(400, ERROR_MESSAGES.COUPON_END_BEFORE_START));
   }
@@ -127,8 +136,8 @@ async function postCoupons(req, res, next) {
     discount,
     quantity,
     distributed_quantity: distributedQuantity,
-    start_at: startAt,
-    end_at: endAt,
+    start_at: startAtTime,
+    end_at: endAtTime,
     is_available: isAvailable,
   });
 
@@ -195,7 +204,16 @@ async function putCoupons(req, res, next) {
     return next(new AppError(404, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
-  if (endAt <= startAt) {
+  startAtTime = new Date(startAt).toISOString();
+  endAtTime = new Date(endAt).toISOString();
+  const now = new Date();
+
+  if (startAtTime < now) {
+    logger.warn(ERROR_MESSAGES.COUPON_START_BEFORE_NOW);
+    return next(new AppError(400, ERROR_MESSAGES.COUPON_START_BEFORE_NOW));
+  }
+
+  if (endAtTime <= startAtTime) {
     logger.warn(ERROR_MESSAGES.COUPON_END_BEFORE_START);
     return next(new AppError(400, ERROR_MESSAGES.COUPON_END_BEFORE_START));
   }
