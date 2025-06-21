@@ -160,20 +160,20 @@ Frontend-Dev-Nodejs/
 
 ---
 
-##關於作者
-####團隊成員
-######後端：
-姓名: Tau 
-Email: jason850629@gmail.com
-GitHub: https://github.com/TauHsu
-姓名: Angela
-Email: AngelaChu1598753@gmail.com
-GitHub: https://github.com/Angela-Chu
+## 關於作者
+#### 團隊成員
+###### 後端：
+> 姓名: Tau 
+>> Email: jason850629@gmail.com
+>> GitHub: https://github.com/TauHsu
+> 姓名: Angela
+>> Email: AngelaChu1598753@gmail.com
+>> GitHub: https://github.com/Angela-Chu
 
-######全端：
-姓名: zxlee
-Email: napoleon.lee0114@gmail.com
-GitHub: https://github.com/zxlee0114
+###### 全端：
+> 姓名: zxlee
+>> Email: napoleon.lee0114@gmail.com
+>> GitHub: https://github.com/zxlee0114
 姓名: Hsiang 
 Email: fdsa201305@gmail.com
 GitHub: https://github.com/Hsiang1006
