@@ -5,8 +5,9 @@
 創作緣由：二手攝影器材仍然具有極高的使用價值。許多保存良好的器材，因缺乏合適的流通平台被閒置或低價處理。且購買全新器材的價格高昂，在摸索攝影的過程金錢成本過高，許多人難以負擔。
 所以我們希望打造一個專門的二手攝影器材交易平台，讓器材能夠在攝影愛好者之間流轉，延續其價值。讓舊有的器材有最有效的利用。
 
-> 前台網址：[https://lightpickers.github.io/Frontend-Dev-React/#/](https://lightpickers.github.io/Frontend-Dev-React/#/)
-> 後台網址：[https://lightpickers.github.io/Manage-Dev-React/#/login](https://lightpickers.github.io/Manage-Dev-React/#/login)
+> 平台網址
+> 前台：[https://lightpickers.github.io/Frontend-Dev-React/#/](https://lightpickers.github.io/Frontend-Dev-React/#/)
+> 後台：[https://lightpickers.github.io/Manage-Dev-React/#/login](https://lightpickers.github.io/Manage-Dev-React/#/login)
 
 ---
 
