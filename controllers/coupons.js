@@ -115,11 +115,8 @@ async function postCoupons(req, res, next) {
     );
   }
 
-  const secondsToAdd = 23 * 60 * 60 + 59 * 60 + 59; // 23小時59分59秒
   startAtTime = new Date(startAt).toISOString();
-  endAtTime = new Date(
-    new Date(endAt).getTime() + secondsToAdd * 1000
-  ).toISOString();
+  endAtTime = new Date(endAt).toISOString();
   const now = new Date();
 
   if (startAtTime < now) {
@@ -207,11 +204,8 @@ async function putCoupons(req, res, next) {
     return next(new AppError(404, `優惠券${ERROR_MESSAGES.DATA_NOT_FOUND}`));
   }
 
-  const secondsToAdd = 23 * 60 * 60 + 59 * 60 + 59; // 23小時59分59秒
   startAtTime = new Date(startAt).toISOString();
-  endAtTime = new Date(
-    new Date(endAt).getTime() + secondsToAdd * 1000
-  ).toISOString();
+  endAtTime = new Date(endAt).toISOString();
   const now = new Date();
 
   if (startAtTime < now) {
