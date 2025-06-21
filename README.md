@@ -6,8 +6,8 @@
 所以我們希望打造一個專門的二手攝影器材交易平台，讓器材能夠在攝影愛好者之間流轉，延續其價值。讓舊有的器材有最有效的利用。
 
 > 平台網址
-> 前台：[https://lightpickers.github.io/Frontend-Dev-React/#/](https://lightpickers.github.io/Frontend-Dev-React/#/)
-> 後台：[https://lightpickers.github.io/Manage-Dev-React/#/login](https://lightpickers.github.io/Manage-Dev-React/#/login)
+>> 前台：[https://lightpickers.github.io/Frontend-Dev-React/#/](https://lightpickers.github.io/Frontend-Dev-React/#/)
+>> 後台：[https://lightpickers.github.io/Manage-Dev-React/#/login](https://lightpickers.github.io/Manage-Dev-React/#/login)
 
 ---
 
