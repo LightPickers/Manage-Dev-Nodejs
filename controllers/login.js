@@ -52,7 +52,7 @@ async function login(req, res, next) {
     // 從資料庫取得 管理者 id
     const admin = await dataSource.getRepository("Roles").findOne({
       select: ["id"],
-      where: { name: "管理者" },
+      where: { name: "admin" },
     });
 
     if (existingUser.role_id !== admin.id) {
