@@ -25,7 +25,7 @@ const ERROR_MESSAGES = {
   ADDRESS_NOT_RULE: "地址資料填寫不完整",
   ZIPCODE_NOT_RULE: "郵遞區號必須為 3 碼數字",
   COUPON_NOT_ZERO: "優惠券數量不能為 0",
-  COUPON_START_BEFORE_NOW: "優惠券起始日必須早於現在時間",
+  COUPON_START_BEFORE_NOW: "優惠券起始日不能早於現在時間",
   COUPON_END_BEFORE_START: "優惠券結束日不能早於起始日",
   COUPON_QUANTITY_MORETHAN_DISTRUBUTED: "優惠券庫存須大於已使用數量",
   PRODUCT_IMAGES_NOT_MORE_THAN_FIVE: "商品附圖不能超過五張",
