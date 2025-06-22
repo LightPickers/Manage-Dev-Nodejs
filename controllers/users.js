@@ -54,7 +54,7 @@ async function getUsers(req, res, next) {
   // 取得 使用者 role_id
   const roleUser = await dataSource
     .getRepository("Roles")
-    .findOneBy({ name: "使用者" });
+    .findOneBy({ name: "user" });
   const roleUserId = roleUser.id;
   if (!roleUserId) {
     logger.warn(`使用者 role_id ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
