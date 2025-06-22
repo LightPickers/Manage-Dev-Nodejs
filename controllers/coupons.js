@@ -120,9 +120,9 @@ async function postCoupons(req, res, next) {
   endAtTime = new Date(
     new Date(endAt).getTime() + secondsToAdd * 1000
   ).toISOString();
-  const now = new Date();
+  const now = new Date().toISOString();
 
-  if (startAtTime < now) {
+  if (startAtTime <= now) {
     logger.warn(ERROR_MESSAGES.COUPON_START_BEFORE_NOW);
     return next(new AppError(400, ERROR_MESSAGES.COUPON_START_BEFORE_NOW));
   }
@@ -212,9 +212,9 @@ async function putCoupons(req, res, next) {
   endAtTime = new Date(
     new Date(endAt).getTime() + secondsToAdd * 1000
   ).toISOString();
-  const now = new Date();
+  const now = new Date().toISOString();
 
-  if (startAtTime < now) {
+  if (startAtTime <= now) {
     logger.warn(ERROR_MESSAGES.COUPON_START_BEFORE_NOW);
     return next(new AppError(400, ERROR_MESSAGES.COUPON_START_BEFORE_NOW));
   }
