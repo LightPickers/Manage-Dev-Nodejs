@@ -67,7 +67,7 @@ const isAuth = async (req, res, next) => {
 const isAdmin = async (req, res, next) => {
   const admin = await dataSource.getRepository("Roles").findOne({
     select: ["id"],
-    where: { name: "管理者" },
+    where: { name: "admin" },
   });
 
   if (req.user && req.user.role_id === admin.id) {

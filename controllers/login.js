@@ -34,25 +34,21 @@ async function login(req, res, next) {
 
     if (!existingUser) {
       logger.warn(ERROR_MESSAGES.USER_NOT_FOUND_OR_PASSWORD_FALSE);
-      return res.status(401).json({
-        status: "false",
-        message: ERROR_MESSAGES.USER_NOT_FOUND_OR_PASSWORD_FALSE,
-      });
+      return next(
+        new AppError(401, ERROR_MESSAGES.USER_NOT_FOUND_OR_PASSWORD_FALSE)
+      );
     }
 
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (!isMatch) {
       logger.warn(ERROR_MESSAGES.PASSWORD_FALSE); // 密碼錯誤訊息
-      return res.status(401).json({
-        status: "false",
-        message: ERROR_MESSAGES.PASSWORD_FALSE,
-      });
+      return next(new AppError(401, ERROR_MESSAGES.PASSWORD_FALSE));
     }
 
     // 從資料庫取得 管理者 id
     const admin = await dataSource.getRepository("Roles").findOne({
       select: ["id"],
-      where: { name: "管理者" },
+      where: { name: "admin" },
     });
 
     if (existingUser.role_id !== admin.id) {

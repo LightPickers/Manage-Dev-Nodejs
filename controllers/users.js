@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken");
+const config = require("../config/index");
 const logger = require("../utils/logger")("User");
 const { dataSource } = require("../db/data-source");
 const { validateFields } = require("../utils/validateFields");
@@ -52,7 +54,7 @@ async function getUsers(req, res, next) {
   // 取得 使用者 role_id
   const roleUser = await dataSource
     .getRepository("Roles")
-    .findOneBy({ name: "使用者" });
+    .findOneBy({ name: "user" });
   const roleUserId = roleUser.id;
   if (!roleUserId) {
     logger.warn(`使用者 role_id ${ERROR_MESSAGES.DATA_NOT_FOUND}`);
@@ -165,7 +167,65 @@ async function changeUserPermission(req, res, next) {
   });
 }
 
+//
+async function verifyAdmin(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer")) {
+    next(new AppError(401, ERROR_MESSAGES.USER_NOT_SIGNUP));
+  }
+  const token = authHeader.split(" ")[1];
+
+  const decoded = await new Promise((resolve, reject) => {
+    jwt.verify(token, config.get("secret.jwtSecret"), (err, decoded) => {
+      if (err) {
+        // reject(err)
+        // return
+        switch (err.name) {
+          case "TokenExpiredError":
+            reject(new AppError(401, ERROR_MESSAGES.EXPIRED_TOKEN));
+            break;
+          default:
+            reject(new AppError(401, ERROR_MESSAGES.INVALID_TOKEN));
+            break;
+        }
+      } else {
+        resolve(decoded);
+      }
+    });
+  });
+
+  // 取得現在的使用者 id, name, role_id
+  const currentUser = await dataSource.getRepository("Users").findOne({
+    select: ["id", "name", "role_id"],
+    where: { id: decoded.id },
+  });
+
+  // 取得 Roles 管理者資料
+  const admin = await dataSource
+    .getRepository("Roles")
+    .findOneBy({ name: "admin" });
+
+  // 判斷是否有此使用者資料
+  if (!currentUser) {
+    logger.warn(ERROR_MESSAGES.USER_NOT_FOUND);
+    return next(new AppError(404, ERROR_MESSAGES.USER_NOT_FOUND));
+  }
+
+  // 判斷此使用者是否為 管理者
+  if (currentUser.role_id !== admin.id) {
+    logger.warn(ERROR_MESSAGES.NOT_ADMIN_ENTER_ADMIN_ROUTE);
+    return next(new AppError(403, ERROR_MESSAGES.PERMISSION_DENIED));
+  }
+
+  res.status(200).json({
+    message: "驗證成功",
+    status: true,
+    user: currentUser,
+  });
+}
+
 module.exports = {
   getUsers,
   changeUserPermission,
+  verifyAdmin,
 };
